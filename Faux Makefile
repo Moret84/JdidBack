@@ -1,0 +1,22 @@
+BIN=bin/
+OBJ=obj/
+SRC=src/
+INC=inc/
+OPTS=-lGL -LIrrlicht -I$(INC)
+
+all: $(BIN)JdidBack clean
+
+$(BIN)JdidBack: $(OBJ)Case.o $(OBJ)Echiquier.o $(SRC)main.cpp
+	g++ $(OPTS) -o $(BIN)JdidBack $(OBJ)Case.o $(OBJ)Echiquier.o $(SRC)main.cpp
+
+$(OBJ)Case.o: $(SRC)Case.cpp $(INC)Case.hpp
+	g++ $(OPTS) -o $(OBJ)Case.o -c $(SRC)Case.cpp 
+
+$(OBJ)Echiquier.o: $(SRC)Echiquier.cpp $(INC)Echiquier.hpp
+	g++ $(OPTS) -o $(OBJ)Echiquier.o -c $(SRC)Echiquier.cpp
+
+clean:
+	rm -f $(OBJ)*.o
+
+mrproper: clean
+	rm -f $(BIN)JdidBack

@@ -1,13 +1,13 @@
 
-OPTS= -std=c++11 -lGL -lIrrlicht
+OPTS= -std=c++11 -lGL -lIrrlicht -ggdb
 
 all: Jeu clean
 
-Jeu:main.cpp Partie.o Echiquier.o
-	g++ $(OPTS) -o Jeu Partie.o Echiquier.o main.cpp
+Jeu:main.cpp Partie.o Plateau.o
+	g++ $(OPTS) -o Jeu Partie.o Plateau.o main.cpp
 
-Echiquier.o:Echiquier.cpp
-	g++ $(OPTS) -o Echiquier.o -c Echiquier.cpp
+Plateau.o:Plateau.cpp
+	g++ $(OPTS) -o Plateau.o -c Plateau.cpp
 
 Partie.o:Partie.cpp
 	g++ $(OPTS) -o Partie.o -c Partie.cpp

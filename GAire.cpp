@@ -10,6 +10,9 @@ video::IVideoDrievr* driver = device->getVideoDriver();				//video driver
 
 scene::ISceneManager * sceneManager = device->getSceneManager();	//scene manager
 
+//Echiquier
+
+scene::IAnimatedMeshSceneNode *caseEchiquier = sceneManager->addAnimatedMeshSceneNode(sceneManager->getMesh("testplan.3ds"));
 //Caméra
 
 sceneManager->addCameraSceneNode();					//Caméra fixe

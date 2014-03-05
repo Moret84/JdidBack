@@ -52,6 +52,61 @@ void Plateau::augmenterNiveauCase(int x, int y)
 
 void Plateau::exploserCase(int x, int y)
 {
+	m_grille[x][y] = 0;
+
+	int i(0);
+
+	//Vers le haut 
+	i = y-1;
+	while(i >= 0)
+	{
+		if(m_grille[x][i] != 0)
+		{
+			augmenterNiveauCase(x, i);
+			break;
+		}
+
+		--i;
+	}
+
+	//Vers le bas
+	i = y+1;
+	while(i < m_taille)
+	{
+		if(m_grille[x][i] != 0)
+		{
+			augmenterNiveauCase(x, i);
+			break;
+		}
+
+		++i;
+	}
+
+	//Vers la gauche
+	i = x-1;
+	while(i >=0)
+	{
+		if(m_grille[i][y] != 0)
+		{
+			augmenterNiveauCase(i, y);
+			break;
+		}
+
+		--i;
+	}
+
+	//Vers la droite
+	i = x+1;
+	while(i < m_taille)
+	{
+		if(m_grille[i][y] != 0)
+		{
+			augmenterNiveauCase(i,y);
+			break;
+		}
+		
+		++i;
+	}
 
 }
 

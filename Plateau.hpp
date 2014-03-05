@@ -21,6 +21,8 @@ class Plateau
 		void afficher();
 		bool resolu();
 
+		int getTaille();
+
 };
 
 

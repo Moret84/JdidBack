@@ -119,3 +119,7 @@ bool Plateau::resolu()
 	return true;
 }
 
+int Plateau::getTaille()
+{
+	return m_taille;
+}

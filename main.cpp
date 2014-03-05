@@ -1,5 +1,5 @@
 #include "Plateau.hpp"
-#include <irrlicht/irrlicht.h>
+#include "Rendu.hpp"
 
 using namespace irr;
 using namespace std;
@@ -7,8 +7,21 @@ using namespace std;
 int main()
 {
 
+	Rendu R;
 	Plateau P;
 	int x, y;
+	video::SColor blanc(255,255,255,255);
+	while (R.getDevice()->run())
+	{
+		R.getDriver()->beginScene(true,true, blanc);
+		R.getSceneManager()->drawAll();
+		R.getDriver()->endScene();
+	}
+
+	R.getDevice()->drop();
+	return 0;
+
+	/*
 	while(!P.resolu())
 	{
 		P.afficher();
@@ -17,7 +30,7 @@ int main()
 		cout<<" y = ";
 		cin>>y;
 		P.augmenterNiveauCase(x,y);
-	}
+	}*/
 
 
 /*IrrlichtDevice* device = createDevice(				//Création du device

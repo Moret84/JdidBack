@@ -21,7 +21,10 @@ Rendu::Rendu(int taillePlateau)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
-	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+//	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+
+	//Debug
+	m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.1f,-1);
 
 	dessinerPlateau();
 }
@@ -64,6 +67,8 @@ void Rendu::dessinerPlateau()
 void Rendu::dessinerSpheres(int** plateau)
 {
 	f32 x, y, z;
+	vector3df rotation(0,0,0);
+	vector3df echelle(0.9f, 0.9f, 0.9f);
 
 	m_sphere = new ISceneNode**[m_taillePlateau];
 
@@ -73,6 +78,10 @@ void Rendu::dessinerSpheres(int** plateau)
 
 		for(int j = 0; j < m_taillePlateau; ++j)
 		{
+			vector3df positionCase(m_casePlateau[i][j]->getPosition());
+			vector3df positionSphere(positionCase.X, positionCase.Y + 5.0f, positionCase.Z);
+			m_sphere[i][j] = m_sceneManager->addSphereSceneNode(0.9f, 16, 0, -1, positionSphere, rotation, echelle);
+			m_sphere[i][j]->setMaterialFlag(EMF_WIREFRAME, true);
 		}
 	}
 }

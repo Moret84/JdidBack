@@ -2,6 +2,8 @@
 #define RENDU_HPP
 
 #include <irrlicht/irrlicht.h>
+#include "Plateau.hpp"
+
 class Rendu
 {
 	private:
@@ -10,16 +12,19 @@ class Rendu
 		irr::video::IVideoDriver* m_driver;
 		irr::scene::ISceneManager* m_sceneManager;
 
+		int m_taillePlateau;
 		irr::scene::ISceneNode*** m_casePlateau;
+		irr::scene::ISceneNode*** m_sphere;
 
 	public:
 
-		Rendu();
+		Rendu(int taille);
 
 		irr::IrrlichtDevice* getDevice();
 		irr::video::IVideoDriver* getDriver();
 		irr::scene::ISceneManager* getSceneManager();
-		void dessinerPlateau(int taille = 4);
+		void dessinerPlateau();
+		void dessinerSpheres(int **plateau);			//On récupère l'état du plateau à l'instant t
 
 };
 

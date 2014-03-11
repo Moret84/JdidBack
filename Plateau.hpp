@@ -22,6 +22,7 @@ class Plateau
 		bool resolu();
 
 		int getTaille();
+		int** getGrille();
 
 };
 

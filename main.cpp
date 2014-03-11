@@ -7,9 +7,8 @@ using namespace std;
 int main()
 {
 
-	Rendu R;
+	Rendu R(4);
 	Plateau P;
-	int x, y;
 	video::SColor blanc(255,255,255,255);
 	while (R.getDevice()->run())
 	{

@@ -123,3 +123,9 @@ int Plateau::getTaille()
 {
 	return m_taille;
 }
+
+
+int** Plateau::getGrille()
+{
+	return m_grille;
+}

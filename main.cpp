@@ -9,6 +9,8 @@ int main()
 
 	Rendu R(4);
 	Plateau P;
+
+	P.afficher();
 	R.dessinerSpheres(P.getGrille());
 	video::SColor blanc(255,255,255,255);
 	while (R.getDevice()->run())
@@ -19,7 +21,9 @@ int main()
 	}
 
 	R.getDevice()->drop();
+
 	return 0;
+}
 
 	/*
 	while(!P.resolu())
@@ -76,4 +80,4 @@ while (device->run())
 
 device->drop();
 	return 0;*/
-}
+

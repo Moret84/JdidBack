@@ -22,13 +22,37 @@ Plateau::~Plateau()
 
 void Plateau::initialiser()
 {
-	random_device rd;
+/*	random_device rd;
 	mt19937 gen(rd());
 	uniform_int_distribution<int> valeurCase(0, m_taille-1);
 
 	for(int i = 0; i < m_taille; ++i)
 		for(int j = 0; j < m_taille; ++j)
 			m_grille[i][j]= valeurCase(gen);
+			*/
+
+	//DEBUG
+	m_grille[0][0] = 3; m_grille[1][0] = 2; m_grille[2][0] = 1; m_grille[3][0] = 0;
+	for(int i = 0; i < 4; ++i)
+		for(int j = 1; j < 4; ++j)
+			m_grille[i][j] = 0;
+
+	/*m_grille[0][0] = 2;	
+	m_grille[0][1] = 2;
+	m_grille[0][2] = 2;
+	m_grille[0][3] = 3;
+	m_grille[1][0] = 1;
+	m_grille[1][1] = 1;
+	m_grille[1][2] = 2;
+	m_grille[1][3] = 1;
+	m_grille[2][0] = 0;
+	m_grille[2][1] = 1;
+	m_grille[2][2] = 1;
+	m_grille[2][3] = 2;
+	m_grille[3][0] = 3;
+	m_grille[3][1] = 2;
+	m_grille[3][2] = 2;
+	m_grille[3][3] = 2;*/
 }
 
 void Plateau::afficher()

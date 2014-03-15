@@ -23,8 +23,8 @@ Rendu::Rendu(int taillePlateau)
 	//Caméra fixe
 //	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 
-	//Debug
-	m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.1f,-1);
+	//Debug FPS
+	m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
 
 	dessinerPlateau();
 }
@@ -68,20 +68,33 @@ void Rendu::dessinerSpheres(int** plateau)
 {
 	f32 x, y, z;
 	vector3df rotation(0,0,0);
-	vector3df echelle(0.9f, 0.9f, 0.9f);
+	vector3df tailleWumpa[4], echelle, facteurPositionWumpa;
+	//tailleWumpa = {vector3df(1.0f/300.0f, 0.01f,
+	//tailleWumpa[3] = vector3df(0.01f, 0.01f, 0.01f); 
+	tailleWumpa[3] = vector3df(1.0f,1.0f,1.0f);	
+	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
+	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
+		
 
-	m_sphere = new ISceneNode**[m_taillePlateau];
+	m_sphere = new IAnimatedMeshSceneNode**[m_taillePlateau];
+	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
 
 	for(int i = 0; i < m_taillePlateau; ++i)
 	{
-		m_sphere[i] = new ISceneNode*[m_taillePlateau];
+		m_sphere[i] = new IAnimatedMeshSceneNode*[m_taillePlateau];
 
 		for(int j = 0; j < m_taillePlateau; ++j)
 		{
 			vector3df positionCase(m_casePlateau[i][j]->getPosition());
-			vector3df positionSphere(positionCase.X, positionCase.Y + 5.0f, positionCase.Z);
-			m_sphere[i][j] = m_sceneManager->addSphereSceneNode(0.9f, 16, 0, -1, positionSphere, rotation, echelle);
-			m_sphere[i][j]->setMaterialFlag(EMF_WIREFRAME, true);
+			vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus du plateau
+			
+			if(plateau[i][j] != 0)
+			{
+				echelle	= tailleWumpa[plateau[i][j]];
+				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(wumpa, 0, -1, positionSphere, rotation, echelle);
+				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+			}
+
 		}
 	}
 }

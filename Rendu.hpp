@@ -14,7 +14,7 @@ class Rendu
 
 		int m_taillePlateau;
 		irr::scene::ISceneNode*** m_casePlateau;
-		irr::scene::ISceneNode*** m_sphere;
+		irr::scene::IAnimatedMeshSceneNode*** m_sphere;
 
 	public:
 

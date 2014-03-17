@@ -1,0 +1,7 @@
+        <?xml version="1.0"?>
+        <config>
+                <startUpModel file="some filename" />
+                <messageText caption="Irrlicht Engine Mesh Viewer">
+                        Hello!
+                </messageText>
+        </config>

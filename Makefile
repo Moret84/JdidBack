@@ -1,5 +1,5 @@
 
-OPTS= -std=c++11 -lGL -lIrrlicht -ggdb
+OPTS= -std=c++11 -Wall -lGL -lIrrlicht -ggdb
 
 all: Jeu clean
 

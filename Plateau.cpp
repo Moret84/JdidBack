@@ -32,12 +32,12 @@ void Plateau::initialiser()
 			*/
 
 	//DEBUG
-	m_grille[0][0] = 3; m_grille[1][0] = 2; m_grille[2][0] = 1; m_grille[3][0] = 0;
+/*	m_grille[0][0] = 3; m_grille[1][0] = 2; m_grille[2][0] = 1; m_grille[3][0] = 0;
 	for(int i = 0; i < 4; ++i)
 		for(int j = 1; j < 4; ++j)
-			m_grille[i][j] = 0;
+			m_grille[i][j] = 0;*/
 
-	/*m_grille[0][0] = 2;	
+	m_grille[0][0] = 2;	
 	m_grille[0][1] = 2;
 	m_grille[0][2] = 2;
 	m_grille[0][3] = 3;
@@ -52,7 +52,7 @@ void Plateau::initialiser()
 	m_grille[3][0] = 3;
 	m_grille[3][1] = 2;
 	m_grille[3][2] = 2;
-	m_grille[3][3] = 2;*/
+	m_grille[3][3] = 2;
 }
 
 void Plateau::afficher()

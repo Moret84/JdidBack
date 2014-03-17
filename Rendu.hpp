@@ -19,6 +19,7 @@ class Rendu
 	public:
 
 		Rendu(int taille);
+		~Rendu();
 
 		irr::IrrlichtDevice* getDevice();
 		irr::video::IVideoDriver* getDriver();

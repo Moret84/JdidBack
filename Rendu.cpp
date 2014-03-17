@@ -21,10 +21,10 @@ Rendu::Rendu(int taillePlateau)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
-//	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 
 	//Debug FPS
-	m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
+	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
 
 	dessinerPlateau();
 }
@@ -66,7 +66,6 @@ void Rendu::dessinerPlateau()
 
 void Rendu::dessinerSpheres(int** plateau)
 {
-	f32 x, y, z;
 	vector3df rotation(0,0,0);
 	vector3df tailleWumpa[4], echelle, facteurPositionWumpa;
 	//tailleWumpa = {vector3df(1.0f/300.0f, 0.01f,
@@ -98,6 +97,27 @@ void Rendu::dessinerSpheres(int** plateau)
 		}
 	}
 }
+
+Rendu::~Rendu()
+{
+	for(int i = 0; i < m_taillePlateau; ++i)
+		for(int j = 0; j < m_taillePlateau; ++j)
+		{
+			delete m_casePlateau[i][j];
+			delete m_sphere[i][j];
+		}
+
+	for(int i = 0; i < m_taillePlateau; ++i)
+	{
+		delete[] m_casePlateau[i];
+		delete[] m_sphere[i];
+	}
+	
+	delete[] m_casePlateau;
+	delete[] m_sphere;
+}
+
+
 
 	
 

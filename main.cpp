@@ -7,15 +7,15 @@ using namespace std;
 int main()
 {
 
-	Rendu R(4);
 	Plateau P;
+	Rendu R(&P);
 
 	P.afficher();
-	R.dessinerSpheres(P.getGrille());
 	video::SColor blanc(255,255,255,255);
 	while (R.getDevice()->run())
 	{
 		R.getDriver()->beginScene(true,true, blanc);
+		R.majSphere();
 		R.getSceneManager()->drawAll();
 		R.getDriver()->endScene();
 	}

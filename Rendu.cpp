@@ -4,16 +4,15 @@ using namespace irr;
 using namespace core;
 using namespace video;
 using namespace scene;
+using namespace std;
 
-Rendu::Rendu(int taillePlateau)
+Rendu::Rendu(Plateau* plateauRendu)
 {
 
-	//Taille du plateau à rendre, on la stocke car on sait qu'elle ne changera pas après avoir lancé le rendu
-	m_taillePlateau = taillePlateau;
+	m_plateauRendu = plateauRendu;
 
 	//Device avec API = OPENGL, Fenêtre de taille 640 x 480p et 32bits par pixel
 	m_device = createDevice(EDT_OPENGL, dimension2d<u32>(640,480), 32);
-
 	m_driver = m_device->getVideoDriver();
 	m_sceneManager = m_device->getSceneManager();
 
@@ -25,8 +24,19 @@ Rendu::Rendu(int taillePlateau)
 
 	//Debug FPS
 	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
+	
+	//Noeud père des cases du plateau
+	m_pereCases = m_sceneManager->addEmptySceneNode(0, CASE);
+
+	//Noeud père des cases du plateau
+	m_pereSpheres = m_sceneManager->addEmptySceneNode(0, SPHERE);
+
+	m_clickedSphere = nullptr;
 
 	dessinerPlateau();
+	dessinerSpheres();
+
+	m_device->setEventReceiver(this);
 }
 
 IrrlichtDevice* Rendu::getDevice()
@@ -49,50 +59,48 @@ void Rendu::dessinerPlateau()
 	f32 x, y, z; 
 	x = y = z = 0.0f;
 	
+	m_casePlateau = new ISceneNode**[m_plateauRendu->getTaille()];
 
-	m_casePlateau = new ISceneNode**[m_taillePlateau];
-	
-	for(int i = 0; i < m_taillePlateau; ++i, x = 0.0f, z += 1.1f)
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i, x = 0.0f, z += 1.1f)
 	{
-		m_casePlateau[i] = new ISceneNode*[m_taillePlateau];
+		m_casePlateau[i] = new ISceneNode*[m_plateauRendu->getTaille()];
 
-		for(int j = 0; j < m_taillePlateau; ++j, x+= 1.1f)
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j, x+= 1.1f)
 		{
-			m_casePlateau[i][j] = m_sceneManager->addCubeSceneNode(1.0f, 0,-1, vector3df(x, y, z), vector3df(0, 0, 0), vector3df(1.0f, 0.15f, 1.0f));
+			m_casePlateau[i][j] = m_sceneManager->addCubeSceneNode(1.0f, m_pereCases, i * m_plateauRendu->getTaille() + j, vector3df(x, y, z), vector3df(0, 0, 0), vector3df(1.0f, 0.15f, 1.0f));
 			m_casePlateau[i][j]->setMaterialTexture(0, m_driver->getTexture("caisse.png"));
 		}
 	}
 }
 
-void Rendu::dessinerSpheres(int** plateau)
+void Rendu::dessinerSpheres()
 {
-	vector3df rotation(0,0,0);
-	vector3df tailleWumpa[4], echelle, facteurPositionWumpa;
-	//tailleWumpa = {vector3df(1.0f/300.0f, 0.01f,
-	//tailleWumpa[3] = vector3df(0.01f, 0.01f, 0.01f); 
+	vector3df tailleWumpa[4], echelle;
 	tailleWumpa[3] = vector3df(1.0f,1.0f,1.0f);	
 	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
 	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
 		
-
-	m_sphere = new IAnimatedMeshSceneNode**[m_taillePlateau];
+	m_sphere = new IAnimatedMeshSceneNode**[m_plateauRendu->getTaille()];
 	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
 
-	for(int i = 0; i < m_taillePlateau; ++i)
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
-		m_sphere[i] = new IAnimatedMeshSceneNode*[m_taillePlateau];
+		m_sphere[i] = new IAnimatedMeshSceneNode*[m_plateauRendu->getTaille()]; 
 
-		for(int j = 0; j < m_taillePlateau; ++j)
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
 		{
 			vector3df positionCase(m_casePlateau[i][j]->getPosition());
 			vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus du plateau
 			
-			if(plateau[i][j] != 0)
+			if(m_plateauRendu->getGrille()[i][j] != 0)
 			{
-				echelle	= tailleWumpa[plateau[i][j]];
-				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(wumpa, 0, -1, positionSphere, rotation, echelle);
+				echelle	= tailleWumpa[m_plateauRendu->getGrille()[i][j]];
+				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(wumpa, m_pereSpheres, i * m_plateauRendu->getTaille() + j, positionSphere, vector3df(0,0,0), echelle);
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
 			}
+
+			else
+				m_sphere[i][j] = nullptr;
 
 		}
 	}
@@ -100,14 +108,14 @@ void Rendu::dessinerSpheres(int** plateau)
 
 Rendu::~Rendu()
 {
-	for(int i = 0; i < m_taillePlateau; ++i)
-		for(int j = 0; j < m_taillePlateau; ++j)
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
 		{
 			delete m_casePlateau[i][j];
 			delete m_sphere[i][j];
 		}
 
-	for(int i = 0; i < m_taillePlateau; ++i)
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
 		delete[] m_casePlateau[i];
 		delete[] m_sphere[i];
@@ -117,8 +125,58 @@ Rendu::~Rendu()
 	delete[] m_sphere;
 }
 
+bool Rendu::OnEvent(const SEvent &event)
+{
+	if(event.EventType == EET_MOUSE_INPUT_EVENT)
+	{
+		if(event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+		{
+			position2d <s32> curseur = m_device->getCursorControl()->getPosition();
+			m_clickedSphere = m_sceneManager->getSceneCollisionManager()->getSceneNodeFromScreenCoordinatesBB(curseur, 0, false, m_pereSpheres);
 
+			return true;
+		}	
+	}
+			
+		return false;
+}
+
+void Rendu::majSphere()
+{
+	if(m_clickedSphere == nullptr)
+		return;
+
+	s32 i = m_clickedSphere->getID() / m_plateauRendu->getTaille();
+	s32 j = m_clickedSphere->getID() % m_plateauRendu->getTaille();
+
+	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
+
+	if(m_plateauRendu->getGrille()[i][j] ==	0)
+	{
+		vector3df positionCase(m_casePlateau[i][j]->getPosition());
+		vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus du plateau
+		m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(wumpa, m_pereSpheres, i * m_plateauRendu->getTaille() + j, positionSphere, vector3df(0, 0, 0), vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
+		m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+		m_plateauRendu->augmenterNiveauCase(i,j);
+		m_clickedSphere = nullptr;
+	}
+
+	else if(m_plateauRendu->getGrille()[i][j] == 1)
+	{
+		m_sphere[i][j]->setScale(m_sphere[i][j]->getScale() * 2.0);
+		m_plateauRendu->augmenterNiveauCase(i,j);
+		m_clickedSphere = nullptr;
+	}
+
+	else if(m_plateauRendu->getGrille()[i][j] == 2)
+	{
+		m_sphere[i][j]->setScale(m_sphere[i][j]->getScale() * 3.0/2.0);
+		m_plateauRendu->augmenterNiveauCase(i,j);
+		m_clickedSphere = nullptr;
+	}
+
+		m_clickedSphere = nullptr;
+		return;
 
 	
-
-
+}

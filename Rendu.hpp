@@ -4,7 +4,13 @@
 #include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
 
-class Rendu
+enum typeNoeud :irr::s32 
+{
+	CASE,
+	SPHERE
+};
+
+class Rendu : public irr::IEventReceiver
 {
 	private:
 
@@ -12,21 +18,27 @@ class Rendu
 		irr::video::IVideoDriver* m_driver;
 		irr::scene::ISceneManager* m_sceneManager;
 
-		int m_taillePlateau;
+		Plateau* m_plateauRendu; 
+
+		irr::scene::ISceneNode* m_pereCases;
+		irr::scene::ISceneNode* m_pereSpheres;
 		irr::scene::ISceneNode*** m_casePlateau;
 		irr::scene::IAnimatedMeshSceneNode*** m_sphere;
 
+		irr::scene::ISceneNode* m_clickedSphere;
+
 	public:
 
-		Rendu(int taille);
+		Rendu(Plateau * plateauRendu);
 		~Rendu();
 
 		irr::IrrlichtDevice* getDevice();
 		irr::video::IVideoDriver* getDriver();
 		irr::scene::ISceneManager* getSceneManager();
 		void dessinerPlateau();
-		void dessinerSpheres(int **plateau);			//On récupère l'état du plateau à l'instant t
-
+		void dessinerSpheres();			
+		virtual bool OnEvent(const irr::SEvent &event);
+		void majSphere();
 };
 
 #endif

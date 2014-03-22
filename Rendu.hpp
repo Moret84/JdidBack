@@ -10,7 +10,7 @@ enum typeNoeud :irr::s32
 	SPHERE
 };
 
-class Rendu : public irr::IEventReceiver
+class Rendu : public irr::IEventReceiver										//La classe est également event handler
 {
 	private:
 
@@ -18,10 +18,9 @@ class Rendu : public irr::IEventReceiver
 		irr::video::IVideoDriver* m_driver;
 		irr::scene::ISceneManager* m_sceneManager;
 
-		Plateau* m_plateauRendu; 
-
-		irr::scene::ISceneNode* m_pereCases;
-		irr::scene::ISceneNode* m_pereSpheres;
+		Plateau* m_plateauRendu; 												//Pointeur vers le plateau rendu
+		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène 
+		irr::scene::ISceneNode* m_pereSpheres;									//Hiérarchise le graphe de scène
 		irr::scene::ISceneNode*** m_casePlateau;
 		irr::scene::IAnimatedMeshSceneNode*** m_sphere;
 
@@ -37,6 +36,7 @@ class Rendu : public irr::IEventReceiver
 		irr::scene::ISceneManager* getSceneManager();
 		void dessinerPlateau();
 		void dessinerSpheres();			
+
 		virtual bool OnEvent(const irr::SEvent &event);
 		void majSphere();
 };

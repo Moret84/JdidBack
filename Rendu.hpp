@@ -10,6 +10,14 @@ enum typeNoeud :irr::s32
 	SPHERE
 };
 
+enum directionSphere :irr::s32
+{
+	NORD = 0,
+	SUD,
+	EST,
+	OUEST
+};
+
 class Rendu : public irr::IEventReceiver										//La classe est également event handler
 {
 	private:

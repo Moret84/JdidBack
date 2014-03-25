@@ -73,7 +73,7 @@ void Rendu::dessinerPlateau()
 					i * m_plateauRendu->getTaille() + j, 			//Calcul du numéro ID
 					vector3df(x, y, z), 							//Position du cube, change à chaque tour de boucle
 					vector3df(0, 0, 0), 							//Rotation, ici aucune
-					vector3df(1.0f, 0.15f, 1.0f));					//Échelle, 0.15f en y pour une caisse fine en hauteur
+					vector3df(1.0f, 0.15f , 1.0f));					//Échelle, 0.15f en y pour une caisse fine en hauteur
 			
 			m_casePlateau[i][j]->setMaterialTexture(0, m_driver->getTexture("caisse.png"));
 		}
@@ -174,6 +174,7 @@ void Rendu::majSphere()
 	{
 		vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case
 		vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus du plateau
+
 		m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(
 				wumpa,										//Mesh chargé plus haut                               
 				m_pereSpheres,                              //Toutes les sphères sont filles de pereSpheres
@@ -204,6 +205,37 @@ void Rendu::majSphere()
 
 		m_plateauRendu->augmenterNiveauCase(i,j);
 	}
+
+	else if(m_plateauRendu->getGrille()[i][j] == 3)
+	{
+		m_sphere[i][j]->remove();
+		m_sphere[i][j] = nullptr;
+
+		vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case courante
+		vector3df positionSphere[4];
+		positionSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
+		positionSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
+		positionSphere[EST] = vector3df(positionCase.X + 0.20f , positionCase.Y + 0.11f, positionCase.Z);
+		positionSphere[OUEST] = vector3df(positionCase.X - 0.20f, positionCase.Y + 0.11f, positionCase.Z);
+
+		IAnimatedMeshSceneNode** miniSphere = new IAnimatedMeshSceneNode*[4];	
+
+		for(s32 i = NORD; i <= OUEST; ++i)
+		{
+
+			miniSphere[i] = m_sceneManager->addAnimatedMeshSceneNode(
+					wumpa,										//Mesh chargé plus haut                               
+					m_pereSpheres,                              //Toutes les sphères sont filles de pereSpheres
+					i * m_plateauRendu->getTaille() + j,        //Calcul du numéro ID 
+					positionSphere[i],                          //Position de la sphère, fonction de celle de la case
+					vector3df(0, 0, 0),                         //Rotation, ici aucune
+					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));      //Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
+			
+			miniSphere[i]->setMaterialFlag(EMF_LIGHTING, false);
+			
+		}
+	}
+			
 
 		m_clickedSphere = nullptr;
 		return;

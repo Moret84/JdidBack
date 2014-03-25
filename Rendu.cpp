@@ -225,9 +225,9 @@ void Rendu::majSphere()
 
 			miniSphere[i] = m_sceneManager->addAnimatedMeshSceneNode(
 					wumpa,										//Mesh chargé plus haut                               
-					m_pereSpheres,                              //Toutes les sphères sont filles de pereSpheres
-					i * m_plateauRendu->getTaille() + j,        //Calcul du numéro ID 
-					positionSphere[i],                          //Position de la sphère, fonction de celle de la case
+					0,                              			//Pas de père car vouée à disparaître
+					-1,        									//Pas besoin d'ID non plus
+					positionSphere[i],                          
 					vector3df(0, 0, 0),                         //Rotation, ici aucune
 					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));      //Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
 			

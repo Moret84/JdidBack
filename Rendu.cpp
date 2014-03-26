@@ -236,11 +236,9 @@ void Rendu::majSphere()
 					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
 			
 			miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
-		//	animatorSphere[k] = m_sceneManager->createFlyStraightAnimator(positionSphere[k], getDestination(i,j,k), 1000);
+			animatorSphere[k] = m_sceneManager->createFlyStraightAnimator(positionSphere[k], getDestination(i,j,k), 1000);
+			miniSphere[k]->addAnimator(animatorSphere[k]);
 		}
-		animatorSphere[EST] = m_sceneManager->createFlyStraightAnimator(positionSphere[EST], getDestination(i,j,EST),1000);
-		miniSphere[EST]->addAnimator(animatorSphere[EST]);
-
 	}
 		m_clickedSphere = nullptr;
 		return;
@@ -251,7 +249,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 	int i(0);
 	vector3df position;
 
-	if(directionSphere == EST)
+	if(directionSphere == OUEST)
 	{
 		i = y-1;
 		while(i > 0)
@@ -263,10 +261,10 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		}
 
 		position = m_casePlateau[x][0]->getPosition();
-		position.Z = 0;
+		position.X = m_plateauRendu->getTaille()*1.1f - 0.1f; 
 	}
 
-	else if(directionSphere == OUEST)
+	else if(directionSphere == EST)
 	{
 		i = y+1;
 		while(i < m_plateauRendu->getTaille())
@@ -277,8 +275,9 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 			++i;
 		}
 
-		position = m_casePlateau[x][m_plateauRendu->getTaille()]->getPosition();
-		position.Z = m_plateauRendu->getTaille()*1.1f - 0.1f; 
+
+		position = m_casePlateau[x][m_plateauRendu->getTaille() - 1]->getPosition();
+		position.X = 0;
 	}
 
 	else if(directionSphere == NORD)
@@ -293,7 +292,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		}
 
 		position = m_casePlateau[0][y]->getPosition();
-		position.X = 0; 
+		position.Z = 0.0f; 
 	}
 
 	else if(directionSphere == SUD)
@@ -307,8 +306,8 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 			++i;
 		}
 
-		position = m_casePlateau[m_plateauRendu->getTaille()][y]->getPosition();
-		position.X = m_plateauRendu->getTaille()*1.1f - 0.1f;  
+		position = m_casePlateau[m_plateauRendu->getTaille() - 1][y]->getPosition();
+		position.Z = m_plateauRendu->getTaille()*1.1f - 0.1f;  
 	}
 
 	return position;

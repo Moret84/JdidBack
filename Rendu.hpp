@@ -47,6 +47,7 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 
 		virtual bool OnEvent(const irr::SEvent &event);
 		void majSphere();
+		irr::core::vector3df getDestination(int , int , irr::s32);
 };
 
 #endif

@@ -59,8 +59,8 @@ void Plateau::afficher()
 {
 	for(int i = 0; i < m_taille; ++i)
 	{
-		for(int j = 0; j < m_taille; ++j)
-			cout<<m_grille[j][i]<<" ";
+		for(int j =  0; j < m_taille; ++j)
+			cout<<m_grille[i][j]<<" ";
 		cout<<endl;
 	}
 }

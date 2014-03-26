@@ -20,6 +20,7 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
+	//m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 
 	//Debug FPS
@@ -32,6 +33,15 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_pereSpheres = m_sceneManager->addEmptySceneNode(0, SPHERE);
 
 	m_clickedSphere = nullptr;
+
+	m_casePlateau = new ISceneNode**[m_plateauRendu->getTaille()];
+	m_sphere = new IAnimatedMeshSceneNode**[m_plateauRendu->getTaille()];
+
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		m_casePlateau[i] = new ISceneNode*[m_plateauRendu->getTaille()];
+		m_sphere[i] = new IAnimatedMeshSceneNode*[m_plateauRendu->getTaille()]; 
+	}
 
 	dessinerPlateau();
 	dessinerSpheres();
@@ -58,14 +68,10 @@ void Rendu::dessinerPlateau()
 {
 	f32 x, y, z; 
 	x = y = z = 0.0f;
-	
-	m_casePlateau = new ISceneNode**[m_plateauRendu->getTaille()];
 
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i, x = 0.0f, z += 1.1f)
 	{
-		m_casePlateau[i] = new ISceneNode*[m_plateauRendu->getTaille()];
-
-		for(int j = 0; j < m_plateauRendu->getTaille(); ++j, x+= 1.1f)
+			for(int j = m_plateauRendu->getTaille() - 1; j >= 0; --j, x+= 1.1f)
 		{
 			m_casePlateau[i][j] = m_sceneManager->addCubeSceneNode(
 					1.0f, 											//Taille du cube
@@ -87,13 +93,10 @@ void Rendu::dessinerSpheres()
 	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
 	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
 		
-	m_sphere = new IAnimatedMeshSceneNode**[m_plateauRendu->getTaille()];
 	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
 
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
-		m_sphere[i] = new IAnimatedMeshSceneNode*[m_plateauRendu->getTaille()]; 
-
 		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
 		{
 			vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case courante
@@ -170,7 +173,7 @@ void Rendu::majSphere()
 
 	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
 
-	if(m_plateauRendu->getGrille()[i][j] ==	0)
+	/*if(m_plateauRendu->getGrille()[i][j] ==	0)
 	{
 		vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case
 		vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus du plateau
@@ -186,9 +189,9 @@ void Rendu::majSphere()
 		m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
 	
 		m_plateauRendu->augmenterNiveauCase(i,j);
-	}
+	}*/
 
-	else if(m_plateauRendu->getGrille()[i][j] == 1)
+	if(m_plateauRendu->getGrille()[i][j] == 1)
 	{
 		m_sphere[i][j]
 			->setScale(m_sphere[i][j]		
@@ -211,32 +214,103 @@ void Rendu::majSphere()
 		m_sphere[i][j]->remove();
 		m_sphere[i][j] = nullptr;
 
-		vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case courante
+		vector3df positionCase(m_casePlateau[i][j]->getPosition());						
 		vector3df positionSphere[4];
+
 		positionSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
 		positionSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
-		positionSphere[EST] = vector3df(positionCase.X + 0.20f , positionCase.Y + 0.11f, positionCase.Z);
-		positionSphere[OUEST] = vector3df(positionCase.X - 0.20f, positionCase.Y + 0.11f, positionCase.Z);
+		positionSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
+		positionSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
 
 		IAnimatedMeshSceneNode** miniSphere = new IAnimatedMeshSceneNode*[4];	
+		ISceneNodeAnimator** animatorSphere = new ISceneNodeAnimator*[4];
 
-		for(s32 i = NORD; i <= OUEST; ++i)
+		for(s32 k = NORD; k <= OUEST; ++k)
 		{
-
-			miniSphere[i] = m_sceneManager->addAnimatedMeshSceneNode(
-					wumpa,										//Mesh chargé plus haut                               
-					0,                              			//Pas de père car vouée à disparaître
-					-1,        									//Pas besoin d'ID non plus
-					positionSphere[i],                          
-					vector3df(0, 0, 0),                         //Rotation, ici aucune
-					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));      //Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
+			miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
+					wumpa,												//Mesh chargé plus haut                               
+					0,													//Pas de père car vouée à disparaître
+					-1,													//Pas besoin d'ID non plus
+					positionSphere[k],								
+					vector3df(0, 0, 0),									//Rotation, ici aucune
+					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
 			
-			miniSphere[i]->setMaterialFlag(EMF_LIGHTING, false);
-			
+			miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
+		//	animatorSphere[k] = m_sceneManager->createFlyStraightAnimator(positionSphere[k], getDestination(i,j,k), 1000);
 		}
-	}
-			
+		animatorSphere[EST] = m_sceneManager->createFlyStraightAnimator(positionSphere[EST], getDestination(i,j,EST),1000);
+		miniSphere[EST]->addAnimator(animatorSphere[EST]);
 
+	}
 		m_clickedSphere = nullptr;
 		return;
 }
+
+vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
+{
+	int i(0);
+	vector3df position;
+
+	if(directionSphere == EST)
+	{
+		i = y-1;
+		while(i > 0)
+		{
+			if(m_plateauRendu->getGrille()[x][i] != 0)
+				return m_sphere[x][i]->getPosition();
+
+			--i;
+		}
+
+		position = m_casePlateau[x][0]->getPosition();
+		position.Z = 0;
+	}
+
+	else if(directionSphere == OUEST)
+	{
+		i = y+1;
+		while(i < m_plateauRendu->getTaille())
+		{
+			if(m_plateauRendu->getGrille()[x][i] != 0)
+				return m_sphere[x][i]->getPosition();
+
+			++i;
+		}
+
+		position = m_casePlateau[x][m_plateauRendu->getTaille()]->getPosition();
+		position.Z = m_plateauRendu->getTaille()*1.1f - 0.1f; 
+	}
+
+	else if(directionSphere == NORD)
+	{
+		i = x-1;
+		while(i > 0)
+		{
+			if(m_plateauRendu->getGrille()[i][y] != 0)
+				return m_sphere[i][y]->getPosition();
+
+			--i;
+		}
+
+		position = m_casePlateau[0][y]->getPosition();
+		position.X = 0; 
+	}
+
+	else if(directionSphere == SUD)
+	{
+		i = x+1;
+		while(i < m_plateauRendu->getTaille())
+		{
+			if(m_plateauRendu->getGrille()[i][y] != 0)
+				return m_sphere[i][y]->getPosition();
+
+			++i;
+		}
+
+		position = m_casePlateau[m_plateauRendu->getTaille()][y]->getPosition();
+		position.X = m_plateauRendu->getTaille()*1.1f - 0.1f;  
+	}
+
+	return position;
+}
+

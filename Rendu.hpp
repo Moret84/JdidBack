@@ -46,7 +46,10 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		void dessinerSpheres();			
 
 		virtual bool OnEvent(const irr::SEvent &event);
+		void augmenterNiveauSphere(int, int);
+		void exploserSphere(int, int);
 		void majSphere();
+		
 		irr::core::vector3df getDestination(int , int , irr::s32);
 };
 

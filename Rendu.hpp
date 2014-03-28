@@ -26,14 +26,16 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		irr::video::IVideoDriver* m_driver;
 		irr::scene::ISceneManager* m_sceneManager;
 
-		Plateau* m_plateauRendu; 												//Pointeur vers le plateau rendu
+		Plateau* m_plateauRendu; 												//Pointeur vers le plateau de jeu repréenté 
+
+		irr::scene::IAnimatedMesh * m_wumpa;												//Mesh de la sphère 
 		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène 
 		irr::scene::ISceneNode* m_pereSpheres;									//Hiérarchise le graphe de scène
 		
-		std::vector<std::vector<irr::scene::ISceneNode*>> m_casePlateau;
-		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere;
+		std::vector<std::vector<irr::scene::ISceneNode*>> m_casePlateau;		//Tableau des cases du plateau
+		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
-		irr::scene::ISceneNode* m_clickedSphere;
+		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
 	public:
 
@@ -50,6 +52,7 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
 		void majSphere();
+		void afficher();
 		
 		irr::core::vector3df getDestination(int , int , irr::s32);
 };

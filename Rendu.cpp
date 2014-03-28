@@ -12,7 +12,7 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_plateauRendu = plateauRendu;
 
 	//Device avec API = OPENGL, Fenêtre de taille 640 x 480p et 32bits par pixel
-	m_device = createDevice(EDT_OPENGL, dimension2d<u32>(640,480), 32);
+	m_device = createDevice(EDT_OPENGL, dimension2d<u32>(640,480), 32, false, false, false, this);
 	m_driver = m_device->getVideoDriver();
 	m_sceneManager = m_device->getSceneManager();
 
@@ -20,8 +20,10 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
-	//m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+	
+	//Chargement du mesh
+	m_wumpa = m_sceneManager->getMesh("appletest.obj");
 
 	//Debug FPS
 	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
@@ -45,8 +47,6 @@ Rendu::Rendu(Plateau* plateauRendu)
 
 	dessinerPlateau();
 	dessinerSpheres();
-
-	m_device->setEventReceiver(this);
 }
 
 IrrlichtDevice* Rendu::getDevice()
@@ -93,8 +93,6 @@ void Rendu::dessinerSpheres()
 	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
 	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
 		
-	IAnimatedMesh* wumpa = m_sceneManager->getMesh("appletest.obj");
-
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
 		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
@@ -107,7 +105,7 @@ void Rendu::dessinerSpheres()
 				echelle	= tailleWumpa[m_plateauRendu->getNiveauCase(i, j)];		//Échelle calculée selon le niveau de la case
 
 				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(
-						wumpa, 											//Mesh chargé plus haut
+						m_wumpa, 											//Mesh chargé plus haut
 						m_pereSpheres,									//Toutes les sphères sont filles de pereSpheres
 					   	i * m_plateauRendu->getTaille() + j,			//Calcul du numéro ID 
 					   	positionSphere,									//Position calculée
@@ -156,14 +154,12 @@ bool Rendu::OnEvent(const SEvent &event)
 
 void Rendu::augmenterNiveauSphere(int x, int y)
 {
-		if(m_plateauRendu->getNiveauCase(x, y) == 0)
+		/*if(m_plateauRendu->getNiveauCase(x, y) == 0)
 		{
-			IAnimatedMesh * wumpa = m_sceneManager->getMesh("appletest.obj");
-
 			vector3df positionCase(m_casePlateau[x][y]->getPosition()), positionSphere(positionCase.X, positionCase.Y + 0.11f, positionCase.Z);
 
 			m_sphere[x][y] = m_sceneManager->addAnimatedMeshSceneNode(
-					wumpa,												
+					m_wumpa,												
 					m_pereSpheres,
 					x * m_plateauRendu->getTaille() + y,
 					positionSphere,
@@ -174,7 +170,7 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 			m_plateauRendu->augmenterNiveauCase(x, y);
 		}
 			
-		else if(m_plateauRendu->getNiveauCase(x, y) == 1)
+		else*/ if(m_plateauRendu->getNiveauCase(x, y) == 1)
 		{
 			m_sphere[x][y]->setScale(
 					m_sphere[x][y]->getScale() * 2.0);
@@ -195,27 +191,42 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 		}
 }
 
+void Rendu::afficher()
+{
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+		{
+			if(!m_sphere[i][j])
+				cout<<"0 ";
+			else
+				cout<< m_sphere[i][j]->getScale().X << " ";
+		}
+		cout<<endl;
+	}
+}
+
 void Rendu::exploserSphere(int x, int y)
 {
+	if(m_sphere[x][y])
 	m_sphere[x][y]->remove();
 	m_sphere[x][y] = nullptr;
 
-	IAnimatedMesh * wumpa = m_sceneManager->getMesh("appletest.obj");
-
-	vector3df positionCase(m_casePlateau[x][y]->getPosition()), positionSphere[4];
+	vector3df positionCase(m_casePlateau[x][y]->getPosition());
+	std::vector<vector3df> positionSphere(4);
 
 	positionSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
 	positionSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
 	positionSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
 	positionSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
 
-	IAnimatedMeshSceneNode** miniSphere = new IAnimatedMeshSceneNode*[4];	
-	ISceneNodeAnimator** animatorSphere = new ISceneNodeAnimator*[4];
+	std::vector<IAnimatedMeshSceneNode*> miniSphere(4);
+	std::vector<ISceneNodeAnimator*> animatorSphere(4);
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{
 		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
-				wumpa,												//Mesh chargé plus haut                               
+				m_wumpa,											//Mesh chargé plus haut                               
 				0,													//Pas de père car vouée à disparaître
 				-1,													//Pas besoin d'ID non plus
 				positionSphere[k],								
@@ -225,7 +236,19 @@ void Rendu::exploserSphere(int x, int y)
 		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
 		animatorSphere[k] = m_sceneManager->createFlyStraightAnimator(positionSphere[k], getDestination(x,y,k), 1000);
 		miniSphere[k]->addAnimator(animatorSphere[k]);
+		animatorSphere[k]->drop();
 	}
+
+	/*for(auto it = miniSphere.begin(); it != miniSphere.end(); ++it)
+		delete *it;
+
+	for(auto it = animatorSphere.begin(); it != animatorSphere.end(); ++it)
+		delete *it;
+
+	positionSphere.clear();
+	miniSphere.clear();
+	animatorSphere.clear();
+	*/
 
 	return;
 }

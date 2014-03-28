@@ -10,7 +10,6 @@ int main()
 	Plateau P;
 	Rendu R(&P);
 
-	P.afficher();
 	video::SColor blanc(255,255,255,255);
 	while (R.getDevice()->run())
 	{
@@ -18,6 +17,7 @@ int main()
 		R.majSphere();
 		R.getSceneManager()->drawAll();
 		R.getDriver()->endScene();
+		P.afficher();
 	}
 
 	R.getDevice()->drop();

@@ -34,14 +34,14 @@ Rendu::Rendu(Plateau* plateauRendu)
 
 	m_clickedSphere = nullptr;
 
-	m_casePlateau = new ISceneNode**[m_plateauRendu->getTaille()];
-	m_sphere = new IAnimatedMeshSceneNode**[m_plateauRendu->getTaille()];
+	m_casePlateau.resize(m_plateauRendu->getTaille());
+	m_sphere.resize(m_plateauRendu->getTaille());
 
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
-		m_casePlateau[i] = new ISceneNode*[m_plateauRendu->getTaille()];
-		m_sphere[i] = new IAnimatedMeshSceneNode*[m_plateauRendu->getTaille()]; 
-	}
+		m_casePlateau[i].resize(m_plateauRendu->getTaille());
+		m_sphere[i].resize(m_plateauRendu->getTaille());
+	}	
 
 	dessinerPlateau();
 	dessinerSpheres();
@@ -131,15 +131,6 @@ Rendu::~Rendu()
 			delete m_casePlateau[i][j];
 			delete m_sphere[i][j];
 		}
-
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
-	{
-		delete[] m_casePlateau[i];
-		delete[] m_sphere[i];
-	}
-	
-	delete[] m_casePlateau;
-	delete[] m_sphere;
 }
 
 bool Rendu::OnEvent(const SEvent &event)

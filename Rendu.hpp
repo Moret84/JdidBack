@@ -29,8 +29,9 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		Plateau* m_plateauRendu; 												//Pointeur vers le plateau rendu
 		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène 
 		irr::scene::ISceneNode* m_pereSpheres;									//Hiérarchise le graphe de scène
-		irr::scene::ISceneNode*** m_casePlateau;
-		irr::scene::IAnimatedMeshSceneNode*** m_sphere;
+		
+		std::vector<std::vector<irr::scene::ISceneNode*>> m_casePlateau;
+		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere;
 
 		irr::scene::ISceneNode* m_clickedSphere;
 

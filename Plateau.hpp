@@ -3,13 +3,14 @@
 
 #include <iostream>
 #include <random>
+#include <vector>
 
 class Plateau
 {
 	private:
 
 		int m_taille;
-		int **m_grille;
+		std::vector<std::vector<int>> m_grille;
 		
 	public:
 
@@ -19,10 +20,10 @@ class Plateau
 		void augmenterNiveauCase(int x, int y);
 		void exploserCase(int x, int y);
 		void afficher();
-		bool resolu();
+		bool resolu() const;
 
-		int getTaille();
-		int** getGrille();
+		int getTaille() const;
+		int  getNiveauCase(int x, int y) const;
 
 };
 

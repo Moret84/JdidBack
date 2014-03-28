@@ -102,9 +102,9 @@ void Rendu::dessinerSpheres()
 			vector3df positionCase(m_casePlateau[i][j]->getPosition());							//Récupération position case courante
 			vector3df positionSphere(positionCase.X , positionCase.Y + 0.11f, positionCase.Z);	//Place la sphère au dessus de cette case
 			
-			if(m_plateauRendu->getGrille()[i][j] != 0)
+			if(m_plateauRendu->getNiveauCase(i, j) != 0)
 			{
-				echelle	= tailleWumpa[m_plateauRendu->getGrille()[i][j]];		//Échelle calculée selon le niveau de la case
+				echelle	= tailleWumpa[m_plateauRendu->getNiveauCase(i, j)];		//Échelle calculée selon le niveau de la case
 
 				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(
 						wumpa, 											//Mesh chargé plus haut
@@ -165,7 +165,7 @@ bool Rendu::OnEvent(const SEvent &event)
 
 void Rendu::augmenterNiveauSphere(int x, int y)
 {
-		if(m_plateauRendu->getGrille()[x][y] == 0)
+		if(m_plateauRendu->getNiveauCase(x, y) == 0)
 		{
 			IAnimatedMesh * wumpa = m_sceneManager->getMesh("appletest.obj");
 
@@ -183,21 +183,21 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 			m_plateauRendu->augmenterNiveauCase(x, y);
 		}
 			
-		else if(m_plateauRendu->getGrille()[x][y] == 1)
+		else if(m_plateauRendu->getNiveauCase(x, y) == 1)
 		{
 			m_sphere[x][y]->setScale(
 					m_sphere[x][y]->getScale() * 2.0);
 			m_plateauRendu->augmenterNiveauCase(x,y);	
 		}
 		
-		else if(m_plateauRendu->getGrille()[x][y] == 2)
+		else if(m_plateauRendu->getNiveauCase(x, y) == 2)
 		{
 			m_sphere[x][y]->setScale(
 						m_sphere[x][y]->getScale() * 3.0/2.0);
 			m_plateauRendu->augmenterNiveauCase(x,y);
 		}
 
-		else if(m_plateauRendu->getGrille()[x][y] == 3)
+		else if(m_plateauRendu->getNiveauCase(x, y) == 3)
 		{
 			exploserSphere(x, y);
 			m_plateauRendu->augmenterNiveauCase(x,y);
@@ -263,7 +263,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		i = y-1;
 		while(i > 0)
 		{
-			if(m_plateauRendu->getGrille()[x][i] != 0)
+			if(m_plateauRendu->getNiveauCase(x, i) != 0)
 				return m_sphere[x][i]->getPosition();
 
 			--i;
@@ -278,7 +278,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		i = y+1;
 		while(i < m_plateauRendu->getTaille())
 		{
-			if(m_plateauRendu->getGrille()[x][i] != 0)
+			if(m_plateauRendu->getNiveauCase(x, i) != 0)
 				return m_sphere[x][i]->getPosition();
 
 			++i;
@@ -294,7 +294,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		i = x-1;
 		while(i > 0)
 		{
-			if(m_plateauRendu->getGrille()[i][y] != 0)
+			if(m_plateauRendu->getNiveauCase(i, y) != 0)
 				return m_sphere[i][y]->getPosition();
 
 			--i;
@@ -309,7 +309,7 @@ vector3df Rendu::getDestination(int x, int y, s32 directionSphere)
 		i = x+1;
 		while(i < m_plateauRendu->getTaille())
 		{
-			if(m_plateauRendu->getGrille()[i][y] != 0)
+			if(m_plateauRendu->getNiveauCase(i, y) != 0)
 				return m_sphere[i][y]->getPosition();
 
 			++i;

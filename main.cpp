@@ -15,9 +15,10 @@ int main()
 	{
 		R.getDriver()->beginScene(true,true, blanc);
 		R.majSphere();
+		//cout<<R.getDriver()->getFPS()<<endl;
 		R.getSceneManager()->drawAll();
 		R.getDriver()->endScene();
-		P.afficher();
+		//P.afficher();
 	}
 
 	R.getDevice()->drop();

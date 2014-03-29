@@ -52,9 +52,10 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
 		void majSphere();
+		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
 		void afficher();
 		
-		irr::core::vector3df getDestination(int , int , irr::s32);
+		irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int , int , directionSphere);
 };
 
 #endif

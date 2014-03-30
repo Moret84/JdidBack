@@ -18,7 +18,7 @@ enum directionSphere :irr::s32
 	OUEST
 };
 
-class Rendu : public irr::IEventReceiver										//La classe est également event handler
+class Rendu : public irr::IEventReceiver, irr::scene::IAnimationEndCallBack				//La classe est également event handler
 {
 	private:
 
@@ -28,7 +28,7 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 
 		Plateau* m_plateauRendu; 												//Pointeur vers le plateau de jeu repréenté 
 
-		irr::scene::IAnimatedMesh * m_wumpa;												//Mesh de la sphère 
+		irr::scene::IAnimatedMesh * m_wumpa;									//Mesh de la sphère 
 		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène 
 		irr::scene::ISceneNode* m_pereSpheres;									//Hiérarchise le graphe de scène
 		
@@ -49,13 +49,14 @@ class Rendu : public irr::IEventReceiver										//La classe est également eve
 		void dessinerSpheres();			
 
 		virtual bool OnEvent(const irr::SEvent &event);
+		virtual void OnAnimationEnd(irr::scene::IAnimatedMeshSceneNode* node);
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
 		void majSphere();
-		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
 		void afficher();
-		
-		irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int , int , directionSphere);
+		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
+		irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
+		inline irr::core::vector3df getPositionPremiereSphere(int, int, directionSphere);
 };
 
 #endif

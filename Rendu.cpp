@@ -174,20 +174,20 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 		{
 			m_sphere[x][y]->setScale(
 					m_sphere[x][y]->getScale() * 2.0);
-		//	m_plateauRendu->augmenterNiveauCase(x,y);	
+			m_plateauRendu->augmenterNiveauCase(x,y);	
 		}
 		
 		else if(m_plateauRendu->getNiveauCase(x, y) == 2)
 		{
 			m_sphere[x][y]->setScale(
 						m_sphere[x][y]->getScale() * 3.0/2.0);
-			//m_plateauRendu->augmenterNiveauCase(x,y);
+			m_plateauRendu->augmenterNiveauCase(x,y);
 		}
 
 		else if(m_plateauRendu->getNiveauCase(x, y) == 3)
 		{
 			exploserSphere(x, y);
-			//m_plateauRendu->augmenterNiveauCase(x,y);
+			m_plateauRendu->augmenterNiveauCase(x,y);
 		}
 }
 
@@ -204,32 +204,45 @@ void Rendu::afficher()
 		}
 		cout<<endl;
 	}
+
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+			cout<<"("<<m_casePlateau[i][j]->getPosition().X<<", "<<m_casePlateau[i][j]->getPosition().Z<<") ";
+		cout<<endl;
+	}
 }
 
 inline std::vector<vector3df> Rendu::calculPositionMiniSpheres(int x, int y)
 {
 	vector3df positionCase(m_casePlateau[x][y]->getPosition());
-	std::vector<vector3df> positionSphere(4);
+	std::vector<vector3df> positionMiniSphere(4);
 
-	positionSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
-	positionSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
-	positionSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
-	positionSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
+	positionMiniSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
+	positionMiniSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
+	positionMiniSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
+	positionMiniSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
 
-	return positionSphere;
+	return positionMiniSphere;
 }
+
+void Rendu::OnAnimationEnd(IAnimatedMeshSceneNode* node)
+{
+
+}
+
 
 void Rendu::exploserSphere(int x, int y)
 {
 	if(!m_sphere[x][y])
 		return;
-		
+
 	m_sphere[x][y]->remove();
 	m_sphere[x][y] = nullptr;
 
-	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y));
+	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y)), destinationSphere(4);
 	std::vector<IAnimatedMeshSceneNode*> miniSphere(4);
-	std::vector<ISceneNodeAnimator*> animatorSphere(4);
+	std::vector<ISceneNodeAnimator*> animatorSphere(4), animatorSphere(4);
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{
@@ -242,12 +255,77 @@ void Rendu::exploserSphere(int x, int y)
 				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
 
 		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
-		animatorSphere[k] = creerAnimateurSphere(x, y, (directionSphere) k);
-		//miniSphere[k]->addAnimator(animatorSphere[k]);
-		//animatorSphere[k]->drop();
+		animatorVolSphere[k] = creerAnimateurSphere(x, y, (directionSphere) k);
+		miniSphere[k]->addAnimator(animatorSphere[k]);
 	}
+
+
+
+		/*vector3df test(getPositionPremiereSphere(x, y, NORD));
+		cerr<<test.X<<", "<<test.Y<<", "<<test.Z<<endl;
+		animatorSphere[NORD] = creerAnimateurSphere(x, y, (directionSphere) NORD);
+		miniSphere[NORD]->addAnimator(animatorSphere[NORD]);*/
 	
-	//animatorSphere[NORD] = creerAnimateurSphere(x,y, NORD);
+		/*for(s32 k = NORD; k <= OUEST; ++k)
+		{
+			if(animatorSphere[k]->hasFinished())
+				miniSphere[k]->remove();
+		}*/
+}
+
+inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere direction)
+{
+	int i;
+
+	if(direction == OUEST)
+	{
+		i = y-1;
+		while(i >= 0)
+		{
+			if(m_sphere[x][i])
+				return m_sphere[x][i]->getPosition();
+
+			--i;
+		}
+	}
+
+	else if(direction == EST)
+	{
+		i = y+1;
+		while(i < m_plateauRendu->getTaille())
+		{
+			if(m_sphere[x][i])
+				return m_sphere[x][i]->getPosition();
+
+			++i;
+		}
+	}
+
+	else if(direction == NORD)
+	{
+		i = x-1;
+		while(i >= 0)
+		{
+			if(m_sphere[i][y])
+				return m_sphere[i][y]->getPosition();
+
+			--i;
+		}
+	}
+
+	else if(direction == SUD)
+	{
+		i = x+1;
+		while(i < m_plateauRendu->getTaille())
+		{
+			if(m_sphere[i][y])
+				return m_sphere[i][y]->getPosition();
+
+			++i;
+		}
+	}
+
+	return vector3df(0.1,0.1,0.1);
 }
 	
 void Rendu::majSphere()
@@ -261,19 +339,33 @@ void Rendu::majSphere()
 	augmenterNiveauSphere(i, j);
 
 	m_clickedSphere = nullptr;
-	
 }
 
 ISceneNodeAnimator* Rendu::creerAnimateurSphere(int x, int y, directionSphere direction)
 {
-	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y)), distance(4, vector3df(0,0,0));
+	vector3df sphereDestination(getPositionPremiereSphere(x, y, direction));
+	std::vector<vector3df> positionMiniSphere(calculPositionMiniSpheres(x, y)), distance(4, vector3df(0,0,0));
 
-	int taillePlateau(m_plateauRendu->getTaille()), tailleCase(m_casePlateau[0][0]->getScale().X);
+	if(sphereDestination == vector3df(0.1, 0.1, 0.1))
+	{
+		int taillePlateau(m_plateauRendu->getTaille()), tailleCase(m_casePlateau[0][0]->getScale().X);
 
-	distance[NORD].Z = - ((taillePlateau - 1) * tailleCase + 0.8f);
-	distance[SUD].Z = ((taillePlateau - 1) * tailleCase + 0.8f);
-	distance[EST].X = - ((taillePlateau - 1) * tailleCase + 0.8f);
-	distance[OUEST].X = ((taillePlateau - 1) * tailleCase + 0.8f);
+		distance[NORD].Z = - ((taillePlateau - 1) * tailleCase + 0.8f);
+		distance[SUD].Z = ((taillePlateau - 1) * tailleCase + 0.8f);
+		distance[EST].X = - ((taillePlateau - 1) * tailleCase + 0.8f);
+		distance[OUEST].X = ((taillePlateau - 1) * tailleCase + 0.8f);
 
-	return m_sceneManager->createFlyStraightAnimator(positionSphere[direction], positionSphere[direction] + distance[direction], 1000);
+		return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], positionMiniSphere[direction] + distance[direction], 1000);
+	}
+
+	else
+	{
+		vector3df distance(sphereDestination - positionMiniSphere[direction]);
+		if(direction == NORD || direction == SUD)
+		{
+				return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], sphereDestination, abs_(distance.Z/0.004));
+		}
+		else
+			return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], sphereDestination, abs_(distance.X/0.004));
+	}
 }

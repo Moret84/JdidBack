@@ -123,12 +123,6 @@ void Rendu::dessinerSpheres()
 
 Rendu::~Rendu()
 {
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
-		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
-		{
-			delete m_casePlateau[i][j];
-			delete m_sphere[i][j];
-		}
 }
 
 bool Rendu::OnEvent(const SEvent &event)
@@ -226,12 +220,6 @@ inline std::vector<vector3df> Rendu::calculPositionMiniSpheres(int x, int y)
 	return positionMiniSphere;
 }
 
-void Rendu::OnAnimationEnd(IAnimatedMeshSceneNode* node)
-{
-
-}
-
-
 void Rendu::exploserSphere(int x, int y)
 {
 	if(!m_sphere[x][y])
@@ -241,37 +229,42 @@ void Rendu::exploserSphere(int x, int y)
 	m_sphere[x][y] = nullptr;
 
 	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y)), destinationSphere(4);
-	std::vector<IAnimatedMeshSceneNode*> miniSphere(4);
-	std::vector<ISceneNodeAnimator*> animatorSphere(4), animatorSphere(4);
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{
-		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
+		m_miniSphere.push(
+				m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa,											//Mesh chargé plus haut                               
 				0,													//Pas de père car vouée à disparaître
 				-1,													//Pas besoin d'ID non plus
 				positionSphere[k],								
 				vector3df(0, 0, 0),									//Rotation, ici aucune
-				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
+				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0))				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
+					);
 
-		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
-		animatorVolSphere[k] = creerAnimateurSphere(x, y, (directionSphere) k);
-		miniSphere[k]->addAnimator(animatorSphere[k]);
+		m_miniSphere.back()->setMaterialFlag(EMF_LIGHTING, false);
+		m_animator.push(creerAnimateurSphere(x, y, (directionSphere) k));
+		m_miniSphere.back()->addAnimator(m_animator.back());
 	}
-
-
-
-		/*vector3df test(getPositionPremiereSphere(x, y, NORD));
-		cerr<<test.X<<", "<<test.Y<<", "<<test.Z<<endl;
-		animatorSphere[NORD] = creerAnimateurSphere(x, y, (directionSphere) NORD);
-		miniSphere[NORD]->addAnimator(animatorSphere[NORD]);*/
-	
-		/*for(s32 k = NORD; k <= OUEST; ++k)
-		{
-			if(animatorSphere[k]->hasFinished())
-				miniSphere[k]->remove();
-		}*/
 }
+
+void Rendu::testAnimator()
+{
+	if(!m_animator.empty())
+	{
+		if(m_animator.front())
+		{
+			if(m_animator.front()->hasFinished())
+			{
+				m_miniSphere.front()->removeAnimator(m_animator.front());
+				m_miniSphere.front()->remove();
+				m_miniSphere.pop();
+				m_animator.pop();
+			}
+		}
+	}
+}
+
 
 inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere direction)
 {
@@ -340,6 +333,7 @@ void Rendu::majSphere()
 
 	m_clickedSphere = nullptr;
 }
+
 
 ISceneNodeAnimator* Rendu::creerAnimateurSphere(int x, int y, directionSphere direction)
 {

@@ -1,8 +1,8 @@
 #ifndef RENDU_HPP
 #define RENDU_HPP
 
-#include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
+#include "MiniSphere.hpp"
 
 enum typeNoeud :irr::s32 
 {
@@ -10,13 +10,6 @@ enum typeNoeud :irr::s32
 	SPHERE
 };
 
-enum directionSphere :irr::s32
-{
-	NORD = 0,
-	SUD,
-	EST,
-	OUEST
-};
 
 class Rendu : public irr::IEventReceiver 										//La classe est également event handler
 {
@@ -38,15 +31,17 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 		std::queue<irr::scene::ISceneNodeAnimator*> m_animator;
 		std::queue<irr::scene::IAnimatedMeshSceneNode*> m_miniSphere;
+		std::queue<irr::scene::IAnimatedMeshSceneNode*> m_destinationMiniSphere;
 
 	public:
 
 		Rendu(Plateau * plateauRendu);
 		~Rendu();
 
-		irr::IrrlichtDevice* getDevice();
-		irr::video::IVideoDriver* getDriver();
-		irr::scene::ISceneManager* getSceneManager();
+		irr::IrrlichtDevice* getDevice() { return m_device; } ;
+		irr::video::IVideoDriver* getDriver() { return m_driver; };
+		irr::scene::ISceneManager* getSceneManager() { return m_sceneManager; } ;
+
 		void dessinerPlateau();
 		void dessinerSpheres();			
 
@@ -57,7 +52,7 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void afficher();
 		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
 		irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
-		inline irr::core::vector3df getPositionPremiereSphere(int, int, directionSphere);
+		inline irr::s32 getIdPremiereSphere(int, int, directionSphere);
 		void testAnimator();
 };
 

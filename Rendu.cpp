@@ -49,21 +49,6 @@ Rendu::Rendu(Plateau* plateauRendu)
 	dessinerSpheres();
 }
 
-IrrlichtDevice* Rendu::getDevice()
-{
-	return m_device;
-}
-
-IVideoDriver* Rendu::getDriver()
-{
-	return m_driver;
-}
-
-ISceneManager* Rendu::getSceneManager()
-{
-	return m_sceneManager;
-}
-
 void Rendu::dessinerPlateau()
 {
 	f32 x, y, z; 
@@ -266,7 +251,7 @@ void Rendu::testAnimator()
 }
 
 
-inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere direction)
+inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 {
 	int i;
 
@@ -276,7 +261,7 @@ inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere 
 		while(i >= 0)
 		{
 			if(m_sphere[x][i])
-				return m_sphere[x][i]->getPosition();
+				return x * m_plateauRendu->getTaille() + i;
 
 			--i;
 		}
@@ -288,7 +273,7 @@ inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere 
 		while(i < m_plateauRendu->getTaille())
 		{
 			if(m_sphere[x][i])
-				return m_sphere[x][i]->getPosition();
+				return x * m_plateauRendu->getTaille() + i;
 
 			++i;
 		}
@@ -300,7 +285,7 @@ inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere 
 		while(i >= 0)
 		{
 			if(m_sphere[i][y])
-				return m_sphere[i][y]->getPosition();
+				return i * m_plateauRendu->getTaille() + y;
 
 			--i;
 		}
@@ -312,13 +297,13 @@ inline vector3df Rendu::getPositionPremiereSphere(int x, int y, directionSphere 
 		while(i < m_plateauRendu->getTaille())
 		{
 			if(m_sphere[i][y])
-				return m_sphere[i][y]->getPosition();
+				return i * m_plateauRendu->getTaille() + y;
 
 			++i;
 		}
 	}
 
-	return vector3df(0.1,0.1,0.1);
+	return -1;
 }
 	
 void Rendu::majSphere()
@@ -335,12 +320,13 @@ void Rendu::majSphere()
 }
 
 
-ISceneNodeAnimator* Rendu::creerAnimateurSphere(int x, int y, directionSphere direction)
+ISceneNodeAnimator* Rendu::creerAnimateurSphere(s32 x, s32 y, directionSphere direction)
 {
-	vector3df sphereDestination(getPositionPremiereSphere(x, y, direction));
+	ISceneNode* sphereDestination(m_sceneManager->getSceneNodeFromId(getIdPremiereSphere(x, y, direction), m_pereSpheres));
+
 	std::vector<vector3df> positionMiniSphere(calculPositionMiniSpheres(x, y)), distance(4, vector3df(0,0,0));
 
-	if(sphereDestination == vector3df(0.1, 0.1, 0.1))
+	if(!sphereDestination)
 	{
 		int taillePlateau(m_plateauRendu->getTaille()), tailleCase(m_casePlateau[0][0]->getScale().X);
 
@@ -354,12 +340,13 @@ ISceneNodeAnimator* Rendu::creerAnimateurSphere(int x, int y, directionSphere di
 
 	else
 	{
-		vector3df distance(sphereDestination - positionMiniSphere[direction]);
+		vector3df positionSphereDestination(sphereDestination->getPosition());
+		vector3df distance(positionSphereDestination - positionMiniSphere[direction]);
 		if(direction == NORD || direction == SUD)
 		{
-				return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], sphereDestination, abs_(distance.Z/0.004));
+				return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], positionSphereDestination, abs_(distance.Z/0.004));
 		}
 		else
-			return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], sphereDestination, abs_(distance.X/0.004));
+			return m_sceneManager->createFlyStraightAnimator(positionMiniSphere[direction], positionSphereDestination, abs_(distance.X/0.004));
 	}
 }

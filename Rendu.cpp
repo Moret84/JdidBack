@@ -168,6 +168,8 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 			exploserSphere(x, y);
 			m_plateauRendu->augmenterNiveauCase(x,y);
 		}
+
+		return;
 }
 
 void Rendu::afficher()
@@ -213,11 +215,25 @@ void Rendu::exploserSphere(int x, int y)
 	m_sphere[x][y]->remove();
 	m_sphere[x][y] = nullptr;
 
-	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y)), destinationSphere(4);
+	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y));
+	MiniSphere mimi; 
 
 	for(s32 k = NORD; k <= OUEST; ++k)
-	{
-		m_miniSphere.push(
+	{	
+
+		mimi.node = m_sceneManager->addAnimatedMeshSceneNode(
+				m_wumpa, 
+				0,
+				-1,
+				positionSphere[k],
+				vector3df(0, 0, 0),
+				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
+		mimi.node->setMaterialFlag(EMF_LIGHTING, false);
+		mimi.animator = creerAnimateurSphere(x, y, (directionSphere) k);
+		mimi.node->addAnimator(mimi.animator);
+		mimi.idSphereDestination = getIdPremiereSphere(x, y, (directionSphere) k);
+		m_miniSphere.push(mimi);
+	/*	m_miniSphere.push(
 				m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa,											//Mesh chargé plus haut                               
 				0,													//Pas de père car vouée à disparaître
@@ -229,13 +245,27 @@ void Rendu::exploserSphere(int x, int y)
 
 		m_miniSphere.back()->setMaterialFlag(EMF_LIGHTING, false);
 		m_animator.push(creerAnimateurSphere(x, y, (directionSphere) k));
-		m_miniSphere.back()->addAnimator(m_animator.back());
+		m_miniSphere.back()->addAnimator(m_animator.back());*/
 	}
 }
 
 void Rendu::testAnimator()
 {
-	if(!m_animator.empty())
+	if(!m_miniSphere.empty())
+	{
+		if(m_miniSphere.front().animator->hasFinished())
+		{
+			m_miniSphere.front().node->removeAnimator(m_miniSphere.front().animator);
+			m_miniSphere.front().node->remove();
+
+			if(m_miniSphere.front().idSphereDestination != -1)
+				m_animation.push(m_miniSphere.front().idSphereDestination);
+
+			m_miniSphere.pop();
+		}
+	}
+
+/*	if(!m_animator.empty())
 	{
 		if(m_animator.front())
 		{
@@ -247,7 +277,7 @@ void Rendu::testAnimator()
 				m_animator.pop();
 			}
 		}
-	}
+	}*/
 }
 
 
@@ -308,6 +338,12 @@ inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 	
 void Rendu::majSphere()
 {
+	if(!m_animation.empty())
+	{
+		m_clickedSphere = m_sceneManager->getSceneNodeFromId(m_animation.front(), m_pereSpheres);
+		m_animation.pop();
+	}
+
 	if(m_clickedSphere == nullptr)
 		return;
 

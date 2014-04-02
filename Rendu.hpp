@@ -1,13 +1,28 @@
 #ifndef RENDU_HPP
 #define RENDU_HPP
 
+#include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
-#include "MiniSphere.hpp"
 
 enum typeNoeud :irr::s32 
 {
 	CASE,
 	SPHERE
+};
+
+enum directionSphere :irr::s32
+{
+	NORD = 0,
+	SUD,
+	EST,
+	OUEST
+};
+
+struct MiniSphere
+{
+	irr::scene::IAnimatedMeshSceneNode* node;
+	irr::scene::ISceneNodeAnimator* animator;
+	irr::s32 idSphereDestination;
 };
 
 
@@ -29,9 +44,10 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
-		std::queue<irr::scene::ISceneNodeAnimator*> m_animator;
-		std::queue<irr::scene::IAnimatedMeshSceneNode*> m_miniSphere;
-		std::queue<irr::scene::IAnimatedMeshSceneNode*> m_destinationMiniSphere;
+		//std::queue<irr::scene::ISceneNodeAnimator*> m_animator;
+		//std::queue<irr::scene::IAnimatedMeshSceneNode*> m_miniSphere;
+		std::queue<MiniSphere> m_miniSphere;
+		std::queue<irr::s32> m_animation;
 
 	public:
 

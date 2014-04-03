@@ -45,32 +45,30 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
-		//std::queue<irr::scene::ISceneNodeAnimator*> m_animator;
-		//std::queue<irr::scene::IAnimatedMeshSceneNode*> m_miniSphere;
-		std::queue<MiniSphere> m_miniSphere;
-		std::queue<irr::s32> m_animation;
+		std::queue<MiniSphere> m_miniSphere;									
 
 	public:
 
 		Rendu(Plateau * plateauRendu);
 		~Rendu();
 
-		irr::IrrlichtDevice* getDevice() { return m_device; } ;
-		irr::video::IVideoDriver* getDriver() { return m_driver; };
-		irr::scene::ISceneManager* getSceneManager() { return m_sceneManager; } ;
+		irr::IrrlichtDevice* getDevice() const { return m_device; } ;
+		irr::video::IVideoDriver* getDriver() const { return m_driver; };
+		irr::scene::ISceneManager* getSceneManager() const { return m_sceneManager; } ;
 
 		void dessinerPlateau();
 		void dessinerSpheres();			
+		void afficher();
 
 		virtual bool OnEvent(const irr::SEvent &event);
+		void majSphere();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
-		void majSphere();
-		void afficher();
-		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
-		irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
-		inline irr::s32 getIdPremiereSphere(int, int, directionSphere);
 		void testAnimator();
+
+		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
+		inline irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
+		inline irr::s32 getIdPremiereSphere(int, int, directionSphere);
 };
 
 #endif

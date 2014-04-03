@@ -110,6 +110,28 @@ Rendu::~Rendu()
 {
 }
 
+void Rendu::afficher()
+{
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+		{
+			if(!m_sphere[i][j])
+				cout<<"0 ";
+			else
+				cout<< m_sphere[i][j]->getScale().X << " ";
+		}
+		cout<<endl;
+	}
+
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+			cout<<"("<<m_casePlateau[i][j]->getPosition().X<<", "<<m_casePlateau[i][j]->getPosition().Z<<") ";
+		cout<<endl;
+	}
+}
+
 bool Rendu::OnEvent(const SEvent &event)
 {
 	if(event.EventType == EET_MOUSE_INPUT_EVENT)
@@ -129,6 +151,19 @@ bool Rendu::OnEvent(const SEvent &event)
 	}
 			
 		return false;
+}
+
+void Rendu::majSphere()
+{
+	if(!m_clickedSphere)
+		return;
+
+	s32 i = m_clickedSphere->getID() / m_plateauRendu->getTaille();		
+	s32 j = m_clickedSphere->getID() % m_plateauRendu->getTaille();
+
+	augmenterNiveauSphere(i, j);
+
+	m_clickedSphere = nullptr;
 }
 
 void Rendu::augmenterNiveauSphere(int x, int y)
@@ -173,40 +208,7 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 		return;
 }
 
-void Rendu::afficher()
-{
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
-	{
-		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
-		{
-			if(!m_sphere[i][j])
-				cout<<"0 ";
-			else
-				cout<< m_sphere[i][j]->getScale().X << " ";
-		}
-		cout<<endl;
-	}
 
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
-	{
-		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
-			cout<<"("<<m_casePlateau[i][j]->getPosition().X<<", "<<m_casePlateau[i][j]->getPosition().Z<<") ";
-		cout<<endl;
-	}
-}
-
-inline std::vector<vector3df> Rendu::calculPositionMiniSpheres(int x, int y)
-{
-	vector3df positionCase(m_casePlateau[x][y]->getPosition());
-	std::vector<vector3df> positionMiniSphere(4);
-
-	positionMiniSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
-	positionMiniSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
-	positionMiniSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
-	positionMiniSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
-
-	return positionMiniSphere;
-}
 
 void Rendu::exploserSphere(int x, int y)
 {
@@ -256,6 +258,18 @@ void Rendu::testAnimator()
 	}
 }
 
+inline std::vector<vector3df> Rendu::calculPositionMiniSpheres(int x, int y)
+{
+	vector3df positionCase(m_casePlateau[x][y]->getPosition());
+	std::vector<vector3df> positionMiniSphere(4);
+
+	positionMiniSphere[NORD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z - 0.20f);
+	positionMiniSphere[SUD] = vector3df(positionCase.X, positionCase.Y + 0.11f, positionCase.Z + 0.20f );
+	positionMiniSphere[EST] = vector3df(positionCase.X - 0.20f , positionCase.Y + 0.11f, positionCase.Z);
+	positionMiniSphere[OUEST] = vector3df(positionCase.X + 0.20f, positionCase.Y + 0.11f, positionCase.Z);
+
+	return positionMiniSphere;
+}
 
 inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 {
@@ -312,21 +326,7 @@ inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 	return -1;
 }
 	
-void Rendu::majSphere()
-{
-	if(!m_clickedSphere)
-		return;
-
-	s32 i = m_clickedSphere->getID() / m_plateauRendu->getTaille();		
-	s32 j = m_clickedSphere->getID() % m_plateauRendu->getTaille();
-
-	augmenterNiveauSphere(i, j);
-
-	m_clickedSphere = nullptr;
-}
-
-
-ISceneNodeAnimator* Rendu::creerAnimateurSphere(s32 x, s32 y, directionSphere direction)
+inline ISceneNodeAnimator* Rendu::creerAnimateurSphere(s32 x, s32 y, directionSphere direction)
 {
 	ISceneNode* sphereDestination(m_sceneManager->getSceneNodeFromId(getIdPremiereSphere(x, y, direction), m_pereSpheres));
 

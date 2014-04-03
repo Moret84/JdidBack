@@ -140,14 +140,3 @@ bool Plateau::resolu() const
 				return false;
 	return true;
 }
-
-int Plateau::getTaille() const
-{
-	return m_taille;
-}
-
-
-int Plateau::getNiveauCase(int x, int y) const
-{
-	return m_grille[x][y];
-}

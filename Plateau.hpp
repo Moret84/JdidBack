@@ -23,8 +23,8 @@ class Plateau
 		void afficher();
 		bool resolu() const;
 
-		int getTaille() const;
-		int  getNiveauCase(int x, int y) const;
+		int getTaille() const { return m_taille; };
+		int getNiveauCase(int x, int y) const { return m_grille[x][y]; }
 
 };
 

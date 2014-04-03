@@ -3,6 +3,7 @@
 
 #include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
+#include <string>
 
 enum typeNoeud :irr::s32 
 {

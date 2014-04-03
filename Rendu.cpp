@@ -154,6 +154,7 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 			m_sphere[x][y]->setScale(
 					m_sphere[x][y]->getScale() * 2.0);
 			m_plateauRendu->augmenterNiveauCase(x,y);	
+
 		}
 		
 		else if(m_plateauRendu->getNiveauCase(x, y) == 2)
@@ -166,8 +167,8 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 		else if(m_plateauRendu->getNiveauCase(x, y) == 3)
 		{
 			exploserSphere(x, y);
-			m_plateauRendu->augmenterNiveauCase(x,y);
 		}
+
 
 		return;
 }
@@ -233,19 +234,6 @@ void Rendu::exploserSphere(int x, int y)
 		mimi.node->addAnimator(mimi.animator);
 		mimi.idSphereDestination = getIdPremiereSphere(x, y, (directionSphere) k);
 		m_miniSphere.push(mimi);
-	/*	m_miniSphere.push(
-				m_sceneManager->addAnimatedMeshSceneNode(
-				m_wumpa,											//Mesh chargé plus haut                               
-				0,													//Pas de père car vouée à disparaître
-				-1,													//Pas besoin d'ID non plus
-				positionSphere[k],								
-				vector3df(0, 0, 0),									//Rotation, ici aucune
-				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0))				//Échelle, ici 1/3 car c'est une petite sphère qu'on ajoute 
-					);
-
-		m_miniSphere.back()->setMaterialFlag(EMF_LIGHTING, false);
-		m_animator.push(creerAnimateurSphere(x, y, (directionSphere) k));
-		m_miniSphere.back()->addAnimator(m_animator.back());*/
 	}
 }
 
@@ -259,25 +247,13 @@ void Rendu::testAnimator()
 			m_miniSphere.front().node->remove();
 
 			if(m_miniSphere.front().idSphereDestination != -1)
-				m_animation.push(m_miniSphere.front().idSphereDestination);
+			{
+				m_clickedSphere = m_sceneManager->getSceneNodeFromId(m_miniSphere.front().idSphereDestination, m_pereSpheres);
+			}
 
 			m_miniSphere.pop();
 		}
 	}
-
-/*	if(!m_animator.empty())
-	{
-		if(m_animator.front())
-		{
-			if(m_animator.front()->hasFinished())
-			{
-				m_miniSphere.front()->removeAnimator(m_animator.front());
-				m_miniSphere.front()->remove();
-				m_miniSphere.pop();
-				m_animator.pop();
-			}
-		}
-	}*/
 }
 
 
@@ -338,13 +314,7 @@ inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 	
 void Rendu::majSphere()
 {
-	if(!m_animation.empty())
-	{
-		m_clickedSphere = m_sceneManager->getSceneNodeFromId(m_animation.front(), m_pereSpheres);
-		m_animation.pop();
-	}
-
-	if(m_clickedSphere == nullptr)
+	if(!m_clickedSphere)
 		return;
 
 	s32 i = m_clickedSphere->getID() / m_plateauRendu->getTaille();		

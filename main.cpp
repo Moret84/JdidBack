@@ -16,7 +16,9 @@ int main()
 		R.getDriver()->beginScene(true,true, blanc);
 		R.testAnimator();
 		R.majSphere();
-		cout<<R.getDriver()->getFPS()<<endl;
+		//R.afficher();
+		//P.afficher();
+		///cout<<R.getDriver()->getFPS()<<endl;
 		R.getSceneManager()->drawAll();
 		R.getDriver()->endScene();
 		//P.afficher();

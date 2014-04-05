@@ -8,7 +8,6 @@ using namespace std;
 
 Rendu::Rendu(Plateau* plateauRendu)
 {
-
 	m_plateauRendu = plateauRendu;
 
 	//Device avec API = OPENGL, Fenêtre de taille 640 x 480p et 32bits par pixel
@@ -77,6 +76,8 @@ void Rendu::dessinerSpheres()
 	tailleWumpa[3] = vector3df(1.0f,1.0f,1.0f);	
 	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
 	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
+
+	ITriangleSelector* selecteur = m_sceneManager->createTriangleSelector(m_[i][j]->getMesh(), m_sphere[i][j]);	
 		
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
@@ -98,6 +99,7 @@ void Rendu::dessinerSpheres()
 					   	echelle);										//Echelle calculée 
 
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+				m_sphere[i][j]->setTriangleSelector(selecteur);	
 			}
 
 			else
@@ -219,42 +221,42 @@ void Rendu::exploserSphere(int x, int y)
 	m_sphere[x][y] = nullptr;
 
 	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y));
-	MiniSphere mimi; 
+	std::vector<ISceneNode*> miniSphere(4);
+	ISceneNodeAnimatorCollisionResponse* animatorCollision;
+	ITriangleSelector* selecteurSphereDestination;
+	ISceneNode* sphereDestination;
+	irr::s32 idSphereDestination;
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
 
-		mimi.node = m_sceneManager->addAnimatedMeshSceneNode(
+		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa, 
 				0,
 				-1,
 				positionSphere[k],
 				vector3df(0, 0, 0),
 				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
-		mimi.node->setMaterialFlag(EMF_LIGHTING, false);
-		mimi.animator = creerAnimateurSphere(x, y, (directionSphere) k);
-		mimi.node->addAnimator(mimi.animator);
-		mimi.idSphereDestination = getIdPremiereSphere(x, y, (directionSphere) k);
-		m_miniSphere.push(mimi);
-	}
-}
+		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
 
-void Rendu::testAnimator()
-{
-	if(!m_miniSphere.empty())
-	{
-		if(m_miniSphere.front().animator->hasFinished())
+		idSphereDestination = getIdPremiereSphere(x, y, (directionSphere) k);
+		if( idSphereDestination != -1)
 		{
-			m_miniSphere.front().node->removeAnimator(m_miniSphere.front().animator);
-			m_miniSphere.front().node->remove();
+			sphereDestination = m_sceneManager->getSceneNodeFromId(idSphereDestination, m_pereSpheres);
+			selecteurSphereDestination = sphereDestination->getTriangleSelector();
+			//const core::aabbox3d<f32>& box = miniSphere[k]->getBoundingBox();
+			//vector3df radius = box.MaxEdge - box.getCenter();
+			//cerr<< radius.X<<", "<<radius.Y<<", "<<radius.Z<<endl;
 
-			if(m_miniSphere.front().idSphereDestination != -1)
-			{
-				m_clickedSphere = m_sceneManager->getSceneNodeFromId(m_miniSphere.front().idSphereDestination, m_pereSpheres);
-			}
-
-			m_miniSphere.pop();
+			animatorCollision = m_sceneManager->createCollisionResponseAnimator(
+					selecteurSphereDestination, 
+					miniSphere[k], 
+					vector3df(0.5, 0.5, 0.5), 
+					vector3df(0, 0, 0));
+			animatorCollision->setCollisionCallback(&m_collisionHandler);
+			sphereDestination->addAnimator(animatorCollision);		
 		}
+			miniSphere[k]->addAnimator(creerAnimateurMiniSphere(x, y, (directionSphere) k));
 	}
 }
 
@@ -326,7 +328,7 @@ inline s32 Rendu::getIdPremiereSphere(int x, int y, directionSphere direction)
 	return -1;
 }
 	
-inline ISceneNodeAnimator* Rendu::creerAnimateurSphere(s32 x, s32 y, directionSphere direction)
+inline ISceneNodeAnimator* Rendu::creerAnimateurMiniSphere(s32 x, s32 y, directionSphere direction)
 {
 	ISceneNode* sphereDestination(m_sceneManager->getSceneNodeFromId(getIdPremiereSphere(x, y, direction), m_pereSpheres));
 

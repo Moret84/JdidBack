@@ -3,6 +3,7 @@
 
 #include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
+#include "Collision.hpp"
 #include <string>
 
 enum typeNoeud :irr::s32 
@@ -19,15 +20,7 @@ enum directionSphere :irr::s32
 	OUEST
 };
 
-struct MiniSphere
-{
-	irr::scene::IAnimatedMeshSceneNode* node;
-	irr::scene::ISceneNodeAnimator* animator;
-	irr::s32 idSphereDestination;
-};
-
-
-class Rendu : public irr::IEventReceiver 										//La classe est également event handler
+class Rendu : public irr::IEventReceiver						 				//La classe est également event handler
 {
 	private:
 
@@ -45,7 +38,8 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
-		std::queue<MiniSphere> m_miniSphere;									
+
+		CollisionHandler m_collisionHandler;
 
 	public:
 
@@ -64,10 +58,9 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void majSphere();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
-		void testAnimator();
 
 		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
-		inline irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
+		inline irr::scene::ISceneNodeAnimator* creerAnimateurMiniSphere(int, int, directionSphere);
 		inline irr::s32 getIdPremiereSphere(int, int, directionSphere);
 };
 

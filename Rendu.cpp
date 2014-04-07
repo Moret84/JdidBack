@@ -77,7 +77,6 @@ void Rendu::dessinerSpheres()
 	tailleWumpa[2] = tailleWumpa[3] * (2.0f/3.0f);
 	tailleWumpa[1] = tailleWumpa[3] / 3.0f;
 
-	ITriangleSelector* selecteur = m_sceneManager->createTriangleSelector(m_[i][j]->getMesh(), m_sphere[i][j]);	
 		
 	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
 	{
@@ -91,7 +90,7 @@ void Rendu::dessinerSpheres()
 				echelle	= tailleWumpa[m_plateauRendu->getNiveauCase(i, j)];		//Échelle calculée selon le niveau de la case
 
 				m_sphere[i][j] = m_sceneManager->addAnimatedMeshSceneNode(
-						m_wumpa, 											//Mesh chargé plus haut
+						m_wumpa, 										//Mesh chargé plus haut
 						m_pereSpheres,									//Toutes les sphères sont filles de pereSpheres
 					   	i * m_plateauRendu->getTaille() + j,			//Calcul du numéro ID 
 					   	positionSphere,									//Position calculée
@@ -99,7 +98,9 @@ void Rendu::dessinerSpheres()
 					   	echelle);										//Echelle calculée 
 
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+				ITriangleSelector* selecteur = m_sceneManager->createTriangleSelector(m_wumpa, m_sphere[i][j]);	
 				m_sphere[i][j]->setTriangleSelector(selecteur);	
+				selecteur->drop();
 			}
 
 			else
@@ -229,7 +230,6 @@ void Rendu::exploserSphere(int x, int y)
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
-
 		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa, 
 				0,
@@ -240,21 +240,22 @@ void Rendu::exploserSphere(int x, int y)
 		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
 
 		idSphereDestination = getIdPremiereSphere(x, y, (directionSphere) k);
-		if( idSphereDestination != -1)
+		sphereDestination = m_sceneManager->getSceneNodeFromId(idSphereDestination, m_pereSpheres);
+
+		if(sphereDestination)
 		{
-			sphereDestination = m_sceneManager->getSceneNodeFromId(idSphereDestination, m_pereSpheres);
 			selecteurSphereDestination = sphereDestination->getTriangleSelector();
-			//const core::aabbox3d<f32>& box = miniSphere[k]->getBoundingBox();
-			//vector3df radius = box.MaxEdge - box.getCenter();
-			//cerr<< radius.X<<", "<<radius.Y<<", "<<radius.Z<<endl;
+			const core::aabbox3d<f32>& box = miniSphere[k]->getBoundingBox();
+			vector3df radius = box.MaxEdge - box.getCenter();
+			cerr<< radius.X<<", "<<radius.Y<<", "<<radius.Z<<endl;
 
 			animatorCollision = m_sceneManager->createCollisionResponseAnimator(
 					selecteurSphereDestination, 
 					miniSphere[k], 
-					vector3df(0.5, 0.5, 0.5), 
+					radius,	
 					vector3df(0, 0, 0));
 			animatorCollision->setCollisionCallback(&m_collisionHandler);
-			sphereDestination->addAnimator(animatorCollision);		
+			miniSphere[k]->addAnimator(animatorCollision);		
 		}
 			miniSphere[k]->addAnimator(creerAnimateurMiniSphere(x, y, (directionSphere) k));
 	}

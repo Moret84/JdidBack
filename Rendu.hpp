@@ -3,7 +3,6 @@
 
 #include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
-#include "Collision.hpp"
 #include <string>
 
 enum typeNoeud :irr::s32 
@@ -20,7 +19,7 @@ enum directionSphere :irr::s32
 	OUEST
 };
 
-class Rendu : public irr::IEventReceiver						 				//La classe est également event handler
+class Rendu : public irr::IEventReceiver, irr::scene::ICollisionCallback						 				//La classe est également event handler
 {
 	private:
 
@@ -39,7 +38,7 @@ class Rendu : public irr::IEventReceiver						 				//La classe est également ev
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
-		CollisionHandler m_collisionHandler;
+///		CollisionHandler m_collisionHandler;
 
 	public:
 
@@ -55,6 +54,7 @@ class Rendu : public irr::IEventReceiver						 				//La classe est également ev
 		void afficher();
 
 		virtual bool OnEvent(const irr::SEvent &event);
+		virtual bool onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator);
 		void majSphere();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);

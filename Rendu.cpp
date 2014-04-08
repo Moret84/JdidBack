@@ -19,10 +19,10 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
-	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+	//m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
 	
 	//Debug FPS
-	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
+	m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
 
 	//Chargement du mesh
 	m_wumpa = m_sceneManager->getMesh("appletest.obj");
@@ -98,6 +98,7 @@ void Rendu::dessinerSpheres()
 					   	echelle);										//Echelle calculée 
 
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+				//ITriangleSelector* selecteur = m_sceneManager->createTriangleSelectorFromBoundingBox(m_sphere[i][j]);	
 				ITriangleSelector* selecteur = m_sceneManager->createTriangleSelector(m_wumpa, m_sphere[i][j]);	
 				m_sphere[i][j]->setTriangleSelector(selecteur);	
 				selecteur->drop();
@@ -154,6 +155,19 @@ bool Rendu::OnEvent(const SEvent &event)
 	}
 			
 		return false;
+}
+
+bool Rendu::onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator)
+{
+	//cerr<<"jdidou"<<endl;
+	ISceneNode* miniSphere = animator.getTargetNode();
+	ISceneNode* sphereDestination = animator.getCollisionNode();
+	m_sceneManager->addToDeletionQueue(miniSphere);
+	int i = sphereDestination->getID() / m_plateauRendu->getTaille();
+	int j = sphereDestination->getID() % m_plateauRendu->getTaille();
+	augmenterNiveauSphere(i, j);
+
+	return true;
 }
 
 void Rendu::majSphere()
@@ -247,17 +261,19 @@ void Rendu::exploserSphere(int x, int y)
 			selecteurSphereDestination = sphereDestination->getTriangleSelector();
 			const core::aabbox3d<f32>& box = miniSphere[k]->getBoundingBox();
 			vector3df radius = box.MaxEdge - box.getCenter();
-			cerr<< radius.X<<", "<<radius.Y<<", "<<radius.Z<<endl;
 
 			animatorCollision = m_sceneManager->createCollisionResponseAnimator(
 					selecteurSphereDestination, 
 					miniSphere[k], 
 					radius,	
 					vector3df(0, 0, 0));
-			animatorCollision->setCollisionCallback(&m_collisionHandler);
+			animatorCollision->setCollisionCallback(this);
 			miniSphere[k]->addAnimator(animatorCollision);		
 		}
-			miniSphere[k]->addAnimator(creerAnimateurMiniSphere(x, y, (directionSphere) k));
+		ISceneNodeAnimator* animator = creerAnimateurMiniSphere(x, y, (directionSphere) k);	
+			miniSphere[k]->addAnimator(animator);
+			animator->drop();
+				
 	}
 }
 

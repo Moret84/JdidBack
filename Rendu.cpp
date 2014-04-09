@@ -159,13 +159,13 @@ bool Rendu::OnEvent(const SEvent &event)
 
 bool Rendu::onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator)
 {
-	//cerr<<"jdidou"<<endl;
-	ISceneNode* miniSphere = animator.getTargetNode();
+	cout<<"jdidou"<<endl;
+	/*ISceneNode* miniSphere = animator.getTargetNode();
 	ISceneNode* sphereDestination = animator.getCollisionNode();
 	m_sceneManager->addToDeletionQueue(miniSphere);
 	int i = sphereDestination->getID() / m_plateauRendu->getTaille();
 	int j = sphereDestination->getID() % m_plateauRendu->getTaille();
-	augmenterNiveauSphere(i, j);
+	augmenterNiveauSphere(i, j);*/
 
 	return true;
 }
@@ -232,7 +232,7 @@ void Rendu::exploserSphere(int x, int y)
 	if(!m_sphere[x][y])
 		return;
 
-	m_sphere[x][y]->remove();
+	m_sceneManager->addToDeletionQueue(m_sphere[x][y]);
 	m_sphere[x][y] = nullptr;
 
 	std::vector<vector3df> positionSphere(calculPositionMiniSpheres(x, y));
@@ -269,11 +269,11 @@ void Rendu::exploserSphere(int x, int y)
 					vector3df(0, 0, 0));
 			animatorCollision->setCollisionCallback(this);
 			miniSphere[k]->addAnimator(animatorCollision);		
+			animatorCollision->drop();
 		}
 		ISceneNodeAnimator* animator = creerAnimateurMiniSphere(x, y, (directionSphere) k);	
 			miniSphere[k]->addAnimator(animator);
 			animator->drop();
-				
 	}
 }
 

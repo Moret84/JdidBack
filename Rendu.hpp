@@ -45,7 +45,6 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
-		std::queue<MiniSphere> m_miniSphere;									
 
 	public:
 
@@ -66,9 +65,9 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void exploserSphere(int, int);
 		void testAnimator();
 
-		inline std::vector<irr::core::vector3df> calculPositionMiniSpheres(int, int);
-		inline irr::scene::ISceneNodeAnimator* creerAnimateurSphere(int, int, directionSphere);
-		inline irr::s32 getIdPremiereSphere(int, int, directionSphere);
+		irr::core::vector3df calculPositionMiniSpheres(int, int, directionSphere);
+		irr::scene::ISceneNodeAnimator* creerAnimateurVol(int, int, directionSphere);
+		irr::scene::ISceneNode* getPremiereSphere(int, int, directionSphere);
 };
 
 #endif

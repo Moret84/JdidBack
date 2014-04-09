@@ -14,7 +14,6 @@ int main()
 	while (R.getDevice()->run())
 	{
 		R.getDriver()->beginScene(true,true, blanc);
-		R.testAnimator();
 		R.majSphere();
 		//R.afficher();
 		//P.afficher();

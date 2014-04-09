@@ -246,6 +246,7 @@ void Rendu::testAnimator()
 		if(m_miniSphere.front().animator->hasFinished())
 		{
 			m_miniSphere.front().node->removeAnimator(m_miniSphere.front().animator);
+			m_miniSphere.front().animator->drop();
 			m_miniSphere.front().node->remove();
 
 			if(m_miniSphere.front().idSphereDestination != -1)

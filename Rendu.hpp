@@ -65,8 +65,7 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void exploserSphere(int, int);
 		void testAnimator();
 
-		irr::core::vector3df calculPositionMiniSpheres(int, int, directionSphere);
-		irr::scene::ISceneNodeAnimator* creerAnimateurVol(int, int, directionSphere);
+		irr::core::vector3df calculDestinationMiniSphere(int, int, directionSphere);
 		irr::scene::ISceneNode* getPremiereSphere(int, int, directionSphere);
 };
 

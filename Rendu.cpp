@@ -219,6 +219,7 @@ void Rendu::exploserSphere(int x, int y)
 	vector3df destinationMiniSphere, positionMiniSphere;
 	f32 tempsAnimation, vitesseAnimation(0.003f);
 	ISceneNode* sphereArrivee;
+	Animation A;
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
@@ -231,22 +232,38 @@ void Rendu::exploserSphere(int x, int y)
 		else
 			tempsAnimation = abs_(destinationMiniSphere.X - positionMiniSphere.X) / vitesseAnimation;
 
-		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
+		A.miniSphere = m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa, 
 				0,
 				x * m_plateauRendu->getTaille() + y,
 				positionMiniSphere,
 				vector3df(0, 0, 0),
 				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
-		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
+		A.miniSphere->setMaterialFlag(EMF_LIGHTING, false);
 
 		ISceneNodeAnimator* animator = m_sceneManager->createFlyStraightAnimator(positionMiniSphere, destinationMiniSphere, tempsAnimation);
-		miniSphere[k]->addAnimator(animator);
+		A.miniSphere->addAnimator(animator);
+		A.destination = sphereArrivee;
+		m_animationEnCours.push_back(A);
 		animator->drop();
 	}
 
 	m_sceneManager->addToDeletionQueue(m_sphere[x][y]);
 	m_sphere[x][y] = nullptr;
+}
+
+void Rendu::testAnimator()
+{
+	if(m_animationEnCours.empty())
+		return;
+	
+	for(auto it = m_animationEnCours.begin(); it != m_animationEnCours.end(); ++it)
+	{
+		if(it->miniSphere->getAnimators().getLast()->hasFinished())
+		{
+			m_sceneManager->addToDeletionQueue(it->miniSphere);
+		}
+	}
 }
 
 ISceneNode* Rendu::getPremiereSphere(int x, int y, directionSphere direction)

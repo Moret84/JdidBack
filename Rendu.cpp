@@ -218,9 +218,11 @@ void Rendu::exploserSphere(int x, int y)
 	std::vector<ISceneNode*> miniSphere(4);
 	vector3df destinationMiniSphere, positionMiniSphere;
 	f32 tempsAnimation, vitesseAnimation(0.003f);
+	ISceneNode* sphereArrivee;
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
+		sphereArrivee = getPremiereSphere(x, y, (directionSphere) k);
 		positionMiniSphere = m_sphere[x][y]->getPosition();
 		destinationMiniSphere = calculDestinationMiniSphere(x, y, (directionSphere) k);
 
@@ -305,7 +307,6 @@ ISceneNode* Rendu::getPremiereSphere(int x, int y, directionSphere direction)
 vector3df Rendu::calculDestinationMiniSphere(s32 x, s32 y, directionSphere direction)
 {
 	ISceneNode* sphereDestination(getPremiereSphere(x, y, direction));
-	//vector3df positionMiniSphere(m_sphere[x][y]->getPosition()), arrivee(positionMiniSphere);
 	vector3df arrivee(m_sphere[x][y]->getPosition());
 
 	if(!sphereDestination)

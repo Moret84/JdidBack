@@ -58,7 +58,7 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void dessinerPlateau();
 		void dessinerSpheres();			
 		void afficher();
-
+		
 		virtual bool OnEvent(const irr::SEvent &event);
 		void majSphere();
 		void augmenterNiveauSphere(int, int);

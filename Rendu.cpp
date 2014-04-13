@@ -98,6 +98,10 @@ void Rendu::dessinerSpheres()
 					   	echelle);										//Echelle calculée 
 
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
+				ITriangleSelector* selector = m_sceneManager->createTriangleSelector(m_sphere[i][j]);
+				m_sphere[i][j]->setTriangleSelector(selector);
+				selector->drop();
+				//m_sphere[i][j]->setDebugDataVisible((E_DEBUG_SCENE_TYPE)(m_sphere[i][j]->isDebugDataVisible()^EDS_NORMALS));
 			}
 
 			else
@@ -130,6 +134,11 @@ void Rendu::afficher()
 			cout<<"("<<m_casePlateau[i][j]->getPosition().X<<", "<<m_casePlateau[i][j]->getPosition().Z<<") ";
 		cout<<endl;
 	}
+}
+
+bool Rendu::onCollision(const ISceneNodeAnimatorCollisionResponse &animator)
+{
+	return true;
 }
 
 bool Rendu::OnEvent(const SEvent &event)
@@ -218,12 +227,10 @@ void Rendu::exploserSphere(int x, int y)
 	std::vector<ISceneNode*> miniSphere(4);
 	vector3df destinationMiniSphere, positionMiniSphere;
 	f32 tempsAnimation, vitesseAnimation(0.003f);
-	ISceneNode* sphereArrivee;
-	Animation A;
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
-		sphereArrivee = getPremiereSphere(x, y, (directionSphere) k);
+		ISceneNode* sphereDestination = getPremiereSphere(x, y, (directionSphere) k);
 		positionMiniSphere = m_sphere[x][y]->getPosition();
 		destinationMiniSphere = calculDestinationMiniSphere(x, y, (directionSphere) k);
 
@@ -232,38 +239,30 @@ void Rendu::exploserSphere(int x, int y)
 		else
 			tempsAnimation = abs_(destinationMiniSphere.X - positionMiniSphere.X) / vitesseAnimation;
 
-		A.miniSphere = m_sceneManager->addAnimatedMeshSceneNode(
+		miniSphere[k] = m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa, 
 				0,
 				x * m_plateauRendu->getTaille() + y,
 				positionMiniSphere,
 				vector3df(0, 0, 0),
 				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
-		A.miniSphere->setMaterialFlag(EMF_LIGHTING, false);
+		miniSphere[k]->setMaterialFlag(EMF_LIGHTING, false);
 
 		ISceneNodeAnimator* animator = m_sceneManager->createFlyStraightAnimator(positionMiniSphere, destinationMiniSphere, tempsAnimation);
-		A.miniSphere->addAnimator(animator);
-		A.destination = sphereArrivee;
-		m_animationEnCours.push_back(A);
+		miniSphere[k]->addAnimator(animator);
 		animator->drop();
+
+		if(sphereDestination)
+		{
+		ISceneNodeAnimatorCollisionResponse* animatorCollision = m_sceneManager->createCollisionResponseAnimator(sphereDestination->getTriangleSelector(), miniSphere[k], vector3df(1.0/3.0f, 1.0/3.0f, 1.0/3.0f), vector3df(0,0,0));
+		miniSphere[k]->addAnimator(animatorCollision);
+		animatorCollision->drop();
+		}
 	}
+
 
 	m_sceneManager->addToDeletionQueue(m_sphere[x][y]);
 	m_sphere[x][y] = nullptr;
-}
-
-void Rendu::testAnimator()
-{
-	if(m_animationEnCours.empty())
-		return;
-	
-	for(auto it = m_animationEnCours.begin(); it != m_animationEnCours.end(); ++it)
-	{
-		if(it->miniSphere->getAnimators().getLast()->hasFinished())
-		{
-			m_sceneManager->addToDeletionQueue(it->miniSphere);
-		}
-	}
 }
 
 ISceneNode* Rendu::getPremiereSphere(int x, int y, directionSphere direction)

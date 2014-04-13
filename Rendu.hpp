@@ -1,7 +1,7 @@
 #ifndef RENDU_HPP
 #define RENDU_HPP
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
 #include <string>
 #include <list>
@@ -27,7 +27,7 @@ struct Animation
 };
 
 
-class Rendu : public irr::IEventReceiver 										//La classe est également event handler
+class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 		//La classe est également event handler
 {
 	private:
 
@@ -45,7 +45,6 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		std::vector<std::vector<irr::scene::IAnimatedMeshSceneNode*>> m_sphere; //Tableau des sphères
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
-		std::list<Animation> m_animationEnCours;
 
 	public:
 
@@ -61,10 +60,10 @@ class Rendu : public irr::IEventReceiver 										//La classe est également ev
 		void afficher();
 		
 		virtual bool OnEvent(const irr::SEvent &event);
+		virtual bool onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator);
 		void majSphere();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
-		void testAnimator();
 
 		irr::core::vector3df calculDestinationMiniSphere(int, int, directionSphere);
 		irr::scene::ISceneNode* getPremiereSphere(int, int, directionSphere);

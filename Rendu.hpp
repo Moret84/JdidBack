@@ -5,6 +5,7 @@
 #include "Plateau.hpp"
 #include <string>
 #include <list>
+#include <array>
 
 enum typeNoeud :irr::s32 
 {
@@ -20,10 +21,12 @@ enum directionSphere :irr::s32
 	OUEST
 };
 
-struct Animation
+struct MiniSphere
 {
-	irr::scene::IAnimatedMeshSceneNode* miniSphere;
-	irr::scene::ISceneNode* destination;
+	irr::scene::IAnimatedMeshSceneNode* node;
+	irr::scene::ISceneNodeAnimator* animatorVol;
+	irr::scene::ISceneNodeAnimator* animatorDelete;
+	irr::scene::ISceneNodeAnimatorCollisionResponse* animatorCollision;
 };
 
 

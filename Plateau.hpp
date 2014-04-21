@@ -4,7 +4,6 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <queue>
 
 class Plateau
 {

@@ -23,10 +23,10 @@ enum directionSphere :irr::s32
 
 struct MiniSphere
 {
-	irr::scene::IAnimatedMeshSceneNode* node;
-	irr::scene::ISceneNodeAnimator* animatorVol;
-	irr::scene::ISceneNodeAnimator* animatorDelete;
-	irr::scene::ISceneNodeAnimatorCollisionResponse* animatorCollision;
+	irr::scene::IAnimatedMeshSceneNode* node = nullptr;
+	irr::scene::ISceneNodeAnimator* animatorVol = nullptr;
+	irr::scene::ISceneNodeAnimator* animatorDelete = nullptr;
+	irr::scene::ISceneNodeAnimatorCollisionResponse* animatorCollision = nullptr;
 };
 
 
@@ -49,6 +49,8 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
+		irr::scene::IMetaTriangleSelector* m_metaSelector;
+
 	public:
 
 		Rendu(Plateau * plateauRendu);
@@ -69,7 +71,6 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		void exploserSphere(int, int);
 
 		irr::core::vector3df calculDestinationMiniSphere(int, int, directionSphere);
-		irr::scene::ISceneNode* getPremiereSphere(int, int, directionSphere);
 };
 
 #endif

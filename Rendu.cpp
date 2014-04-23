@@ -36,6 +36,8 @@ Rendu::Rendu(Plateau* plateauRendu)
 
 	m_clickedSphere = nullptr;
 
+	m_metaSelector = m_sceneManager->createMetaTriangleSelector();
+
 	m_casePlateau.resize(m_plateauRendu->getTaille());
 	m_sphere.resize(m_plateauRendu->getTaille());
 
@@ -98,9 +100,11 @@ void Rendu::dessinerSpheres()
 					   	echelle);										//Echelle calculée 
 
 				m_sphere[i][j]->setMaterialFlag(EMF_LIGHTING, false);
-				ITriangleSelector* selector = m_sceneManager->createTriangleSelector(m_wumpa, m_sphere[i][j]);
+
+				ITriangleSelector* selector = m_sceneManager->createTriangleSelectorFromBoundingBox(m_sphere[i][j]);
 				m_sphere[i][j]->setTriangleSelector(selector);
 				selector->drop();
+				m_metaSelector->addTriangleSelector(m_sphere[i][j]->getTriangleSelector());
 			}
 
 			else
@@ -226,8 +230,6 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 		return;
 }
 
-
-
 void Rendu::exploserSphere(int x, int y)
 {
 	if(!m_sphere[x][y])
@@ -239,7 +241,6 @@ void Rendu::exploserSphere(int x, int y)
 
 	for(s32 k = NORD; k <= OUEST; ++k)
 	{	
-		ISceneNode* sphereDestination = getPremiereSphere(x, y, (directionSphere) k);
 		positionMiniSphere = m_sphere[x][y]->getPosition();
 		destinationMiniSphere = calculDestinationMiniSphere(x, y, (directionSphere) k);
 
@@ -251,7 +252,7 @@ void Rendu::exploserSphere(int x, int y)
 		miniSphere[k].node = m_sceneManager->addAnimatedMeshSceneNode(
 				m_wumpa, 
 				0,
-				x * m_plateauRendu->getTaille() + y,
+				-1,
 				positionMiniSphere,
 				vector3df(0, 0, 0),
 				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
@@ -259,24 +260,19 @@ void Rendu::exploserSphere(int x, int y)
 
 		miniSphere[k].animatorVol = m_sceneManager->createFlyStraightAnimator(positionMiniSphere, destinationMiniSphere, tempsAnimation);
 
-		if(sphereDestination)
-		{
-			miniSphere[k].animatorCollision = m_sceneManager
-				->createCollisionResponseAnimator(sphereDestination->getTriangleSelector(), 
-												  miniSphere[k].node, 
-												  vector3df(1.0/3.0f, 1.0/3.0f, 1.0/3.0f), 
-												  vector3df(0,0,0));
+		m_metaSelector->removeTriangleSelector(m_sphere[x][y]->getTriangleSelector());
+
+		miniSphere[k].animatorCollision = m_sceneManager
+			->createCollisionResponseAnimator(
+					m_metaSelector, 
+					miniSphere[k].node, 
+					vector3df(1.0/3.0f, 1.0/3.0f, 1.0/3.0f), 
+					vector3df(0,0,0));
 
 			miniSphere[k].animatorCollision->setCollisionCallback(this);
 
-			miniSphere[k].animatorDelete = nullptr;
-		}
-
-		else
-		{
 			miniSphere[k].animatorDelete = m_sceneManager->createDeleteAnimator(tempsAnimation);
-			miniSphere[k].animatorCollision = nullptr;
-		}
+		
 	}
 
 	if(m_sphere[x][y])
@@ -307,92 +303,29 @@ void Rendu::exploserSphere(int x, int y)
 	
 }
 
-ISceneNode* Rendu::getPremiereSphere(int x, int y, directionSphere direction)
-{
-	if(!m_sphere[x][y])
-		return nullptr;
-	int i;
-
-	if(direction == OUEST)
-	{
-		i = y-1;
-		while(i >= 0)
-		{
-			if(m_sphere[x][i])
-				return m_sphere[x][i];
-
-			--i;
-		}
-	}
-
-	else if(direction == EST)
-	{
-		i = y+1;
-		while(i < m_plateauRendu->getTaille())
-		{
-			if(m_sphere[x][i])
-				return m_sphere[x][i];
-
-			++i;
-		}
-	}
-
-	else if(direction == NORD)
-	{
-		i = x-1;
-		while(i >= 0)
-		{
-			if(m_sphere[i][y])
-				return m_sphere[i][y];
-
-			--i;
-		}
-	}
-
-	else if(direction == SUD)
-	{
-		i = x+1;
-		while(i < m_plateauRendu->getTaille())
-		{
-			if(m_sphere[i][y])
-				return m_sphere[i][y];
-
-			++i;
-		}
-	}
-
-	return nullptr;
-}
-	
 vector3df Rendu::calculDestinationMiniSphere(s32 x, s32 y, directionSphere direction)
 {
-	ISceneNode* sphereDestination(getPremiereSphere(x, y, direction));
 	vector3df arrivee(m_sphere[x][y]->getPosition());
 
-	if(!sphereDestination)
+	switch(direction)
 	{
-		switch(direction)
-		{
-			case NORD:	
-				arrivee.Z = - m_casePlateau[0][0]->getScale().Z; 
-				break;
+		case NORD:	
+			arrivee.Z = - m_casePlateau[0][0]->getScale().Z; 
+			break;
 
-			case SUD:
-				arrivee.Z = m_plateauRendu->getTaille() * m_casePlateau[0][0]->getScale().Z;
-				break;
+		case SUD:
+			arrivee.Z = m_plateauRendu->getTaille() * m_casePlateau[0][0]->getScale().Z;
+			break;
 
-			case EST:
-				arrivee.X = - m_casePlateau[0][0]->getScale().X;
-				break;
+		case EST:
+			arrivee.X = - m_casePlateau[0][0]->getScale().X;
+			break;
 
-			case OUEST:
-				arrivee.X = m_plateauRendu->getTaille() * m_casePlateau[0][0]->getScale().X; 
-				break;
-		}
-		
-		return arrivee;
+		case OUEST:
+			arrivee.X = m_plateauRendu->getTaille() * m_casePlateau[0][0]->getScale().X; 
+			break;
 	}
 
-	else
-		return sphereDestination->getPosition(); 
+	return arrivee;
 }
+

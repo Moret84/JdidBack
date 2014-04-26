@@ -4,7 +4,6 @@
 #include <irrlicht/irrlicht.h>
 #include "Plateau.hpp"
 #include <string>
-#include <list>
 #include <array>
 
 enum typeNoeud :irr::s32 
@@ -60,8 +59,11 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		irr::video::IVideoDriver* getDriver() const { return m_driver; };
 		irr::scene::ISceneManager* getSceneManager() const { return m_sceneManager; } ;
 
+		void dessinerCase(int, int);
+		void dessinerSphere(int, int);
 		void dessinerPlateau();
 		void dessinerSpheres();			
+
 		void afficher();
 		
 		virtual bool OnEvent(const irr::SEvent &event);

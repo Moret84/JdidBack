@@ -13,6 +13,8 @@ Rendu::Rendu(Plateau* plateauRendu)
 
 	//Device avec API = OPENGL, Fenêtre de taille 640 x 480p et 32bits par pixel
 	m_device = createDevice(EDT_OPENGL, dimension2d<u32>(640,480), 32, false, false, false, this);
+	m_device->setWindowCaption(L"Jdidback");
+
 	m_driver = m_device->getVideoDriver();
 	m_sceneManager = m_device->getSceneManager();
 
@@ -105,6 +107,24 @@ void Rendu::dessinerSpheres()
 				m_sphere[i][j]->setTriangleSelector(selector);
 				selector->drop();
 				m_metaSelector->addTriangleSelector(m_sphere[i][j]->getTriangleSelector());
+
+				vector3df positionDepart = m_sphere[i][j]->getPosition();
+				vector3df positionArrivee = vector3df(positionDepart.X , positionDepart.Y + 0.07, positionDepart.Z - 0.05);
+				
+				ISceneNodeAnimator* animator = m_sceneManager->createFlyStraightAnimator(
+						positionDepart,
+						positionArrivee,
+						500,
+						true,
+						true);
+
+				m_sphere[i][j]->addAnimator(animator);
+				animator->drop();
+
+				animator = m_sceneManager->createRotationAnimator(vector3df(0, 1, 0));
+
+				 m_sphere[i][j]->addAnimator(animator);
+				animator->drop();
 			}
 
 			else
@@ -164,6 +184,14 @@ bool Rendu::OnEvent(const SEvent &event)
 				->getSceneCollisionManager()											
 				->getSceneNodeFromScreenCoordinatesBB(curseur, 0, false, m_pereSpheres);	//Sphère en collision avec le clic
 
+			if(!m_clickedSphere)
+			{	
+				m_clickedSphere = m_sceneManager
+					->getSceneCollisionManager()											
+					->getSceneNodeFromScreenCoordinatesBB(curseur, 0, false, m_pereCases);	//Case en collision avec le clic
+			}
+
+
 			return true;
 		}	
 	}
@@ -187,47 +215,69 @@ void Rendu::majSphere()
 void Rendu::augmenterNiveauSphere(int x, int y)
 {
 	if(!m_sphere[x][y])
-		return;
+	{
+		vector3df positionCase(m_casePlateau[x][y]->getPosition());
+		vector3df positionSphere(positionCase.X, positionCase.Y + 0.11f, positionCase.Z);
 
-		/*if(m_plateauRendu->getNiveauCase(x, y) == 0)
-		{
-			vector3df positionCase(m_casePlateau[x][y]->getPosition()), positionSphere(positionCase.X, positionCase.Y + 0.11f, positionCase.Z);
+		m_sphere[x][y] = m_sceneManager->addAnimatedMeshSceneNode(
+				m_wumpa,												
+				m_pereSpheres,
+				x * m_plateauRendu->getTaille() + y,
+				positionSphere,
+				vector3df(0, 0, 0),
+				vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
 
-			m_sphere[x][y] = m_sceneManager->addAnimatedMeshSceneNode(
-					m_wumpa,												
-					m_pereSpheres,
-					x * m_plateauRendu->getTaille() + y,
-					positionSphere,
-					vector3df(0, 0, 0),
-					vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0));
+		m_sphere[x][y]->setMaterialFlag(EMF_LIGHTING, false);
 
-			m_sphere[x][y]->setMaterialFlag(EMF_LIGHTING, false);
-			m_plateauRendu->augmenterNiveauCase(x, y);
-		}
-			
-		else*/ if(m_sphere[x][y]->getScale() == vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0))
-		{
-			m_sphere[x][y]->setScale(
-					m_sphere[x][y]->getScale() * 2.0);
-			m_plateauRendu->augmenterNiveauCase(x,y);	
+		ITriangleSelector* selector = m_sceneManager->createTriangleSelectorFromBoundingBox(m_sphere[x][y]);
+		m_sphere[x][y]->setTriangleSelector(selector);
+		selector->drop();
+		m_metaSelector->addTriangleSelector(m_sphere[x][y]->getTriangleSelector());
 
-		}
-		
-		else if(m_sphere[x][y]->getScale() == vector3df(2.0/3.0, 2.0/3.0, 2.0/3.0))
-		{
-			m_sphere[x][y]->setScale(
-						m_sphere[x][y]->getScale() * 3.0/2.0);
-		m_plateauRendu->augmenterNiveauCase(x,y);
+		vector3df positionDepart = m_sphere[x][y]->getPosition();
+		vector3df positionArrivee = vector3df(positionDepart.X , positionDepart.Y + 0.07, positionDepart.Z - 0.05);
 
-		}
+		ISceneNodeAnimator* animator = m_sceneManager->createFlyStraightAnimator(
+				positionDepart,
+				positionArrivee,
+				500,
+				true,
+				true);
 
-		else if(m_sphere[x][y]->getScale() == vector3df(1.0, 1.0, 1.0))
-		{
-			exploserSphere(x, y);
-		}
+		m_sphere[x][y]->addAnimator(animator);
+		animator->drop();
+
+		animator = m_sceneManager->createRotationAnimator(vector3df(0, 1, 0));
+
+		m_sphere[x][y]->addAnimator(animator);
+		animator->drop();
+
+		m_plateauRendu->augmenterNiveauCase(x, y);
+	}
+
+else if(m_sphere[x][y]->getScale() == vector3df(1.0/3.0, 1.0/3.0, 1.0/3.0))
+{
+	m_sphere[x][y]->setScale(
+			m_sphere[x][y]->getScale() * 2.0);
+	m_plateauRendu->augmenterNiveauCase(x,y);	
+
+}
+
+else if(m_sphere[x][y]->getScale() == vector3df(2.0/3.0, 2.0/3.0, 2.0/3.0))
+{
+	m_sphere[x][y]->setScale(
+			m_sphere[x][y]->getScale() * 3.0/2.0);
+	m_plateauRendu->augmenterNiveauCase(x,y);
+
+}
+
+else if(m_sphere[x][y]->getScale() == vector3df(1.0, 1.0, 1.0))
+{
+	exploserSphere(x, y);
+}
 
 
-		return;
+return;
 }
 
 void Rendu::exploserSphere(int x, int y)

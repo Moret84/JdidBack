@@ -39,7 +39,7 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		Plateau* m_plateauRendu; 												//Pointeur vers le plateau de jeu repréenté 
 
-		irr::scene::IAnimatedMesh * m_wumpa;									//Mesh de la sphère 
+		irr::scene::IAnimatedMesh* m_wumpa;										//Mesh de la sphère 
 		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène 
 		irr::scene::ISceneNode* m_pereSpheres;									//Hiérarchise le graphe de scène
 		
@@ -48,7 +48,8 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
-		irr::scene::IMetaTriangleSelector* m_metaSelector;
+		std::array <MiniSphere, 4> m_miniSphere;
+		irr::scene::IMetaTriangleSelector* m_metaSelector;						//Sélecteur de sphère pour collision
 
 	public:
 
@@ -59,10 +60,8 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		irr::video::IVideoDriver* getDriver() const { return m_driver; };
 		irr::scene::ISceneManager* getSceneManager() const { return m_sceneManager; } ;
 
-		void dessinerCase(int, int);
-		void dessinerSphere(int, int);
 		void dessinerPlateau();
-		void dessinerSpheres();			
+		void dessinerSphere(int, int);
 
 		void afficher();
 		

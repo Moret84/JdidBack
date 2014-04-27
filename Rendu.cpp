@@ -8,7 +8,6 @@ using namespace std;
 
 Rendu::Rendu(Plateau* plateauRendu)
 {
-
 	m_plateauRendu = plateauRendu;
 
 	//Device avec API = OPENGL, Fenêtre de taille 640 x 480p et 32bits par pixel
@@ -107,7 +106,7 @@ void Rendu::dessinerSphere(int x, int y)
 				m_pereSpheres,									//Toutes les sphères sont filles de pereSpheres
 				x * m_plateauRendu->getTaille() + y,			//Calcul du numéro ID 
 				positionSphere,									//Position calculée
-				vector3df(0),								//Rotation, ici aucune
+				vector3df(0),									//Rotation, ici aucune
 				echelle);										//Echelle calculée 
 
 		m_sphere[x][y]->setMaterialFlag(EMF_LIGHTING, false);
@@ -229,27 +228,20 @@ void Rendu::augmenterNiveauSphere(int x, int y)
 
 	else if(m_sphere[x][y]->getScale() == vector3df(1.0/3))
 	{
-		m_sphere[x][y]->setScale(
-				m_sphere[x][y]->getScale() * 2);
+		m_sphere[x][y]->setScale(m_sphere[x][y]->getScale() * 2);
 		m_plateauRendu->augmenterNiveauCase(x,y);	
 
 	}
 
 	else if(m_sphere[x][y]->getScale() == vector3df(2.0/3))
 	{
-		m_sphere[x][y]->setScale(
-				m_sphere[x][y]->getScale() * 3.0/2);
+		m_sphere[x][y]->setScale(m_sphere[x][y]->getScale() * 3.0/2);
 		m_plateauRendu->augmenterNiveauCase(x,y);
 
 	}
 
 	else if(m_sphere[x][y]->getScale() == vector3df(1))
-	{
 		exploserSphere(x, y);
-	}
-
-
-	return;
 }
 
 void Rendu::exploserSphere(int x, int y)
@@ -283,6 +275,7 @@ void Rendu::exploserSphere(int x, int y)
 
 		m_miniSphere[k].animatorVol = m_sceneManager->createFlyStraightAnimator(positionMiniSphere, destinationMiniSphere, tempsAnimation);
 
+		//On retire la sphère venant d'exploser du sélecteur de triangle 
 		m_metaSelector->removeTriangleSelector(m_sphere[x][y]->getTriangleSelector());
 
 		m_miniSphere[k].animatorCollision = m_sceneManager

@@ -1,20 +1,26 @@
+CC=g++
+CXXFLAGS= -std=c++11 -Wall -ggdb
+LDFLAGS= -lGL -lIrrlicht
 
-OPTS= -std=c++11 -Wall -lGL -lIrrlicht -ggdb
-OBJ=obj/
+SRCDIR=.
+OBJDIR=obj
 
-all: Jeu
+SRC=$(wildcard $(SRCDIR)/*.cpp)
+OBJ=$(SRC:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+EXEC=Jeu
 
-Jeu:main.cpp $(OBJ)Partie.o $(OBJ)Plateau.o $(OBJ)Rendu.o 
-	g++ $(OPTS) -o Jeu $(OBJ)Partie.o $(OBJ)Plateau.o $(OBJ)Rendu.o main.cpp
+all: $(EXEC) 
 
-$(OBJ)Plateau.o:Plateau.cpp
-	g++ $(OPTS) -o $(OBJ)Plateau.o -c Plateau.cpp
+$(EXEC): $(OBJ)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJ)Rendu.o:Rendu.cpp 
-	g++ $(OPTS) -o $(OBJ)Rendu.o -c Rendu.cpp
-
-$(OBJ)Partie.o:Partie.cpp
-	g++ $(OPTS) -o $(OBJ)Partie.o -c Partie.cpp
+%.o: ../%.cpp
+	$(CC) -o $@ -c $< $(CXXFLAGS)
 
 clean:
-	rm -f $(OBJ)/*.o
+	rm -f $(OBJ)
+
+mrproper:clean
+	rm -f $(EXEC)
+
+

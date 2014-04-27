@@ -14,7 +14,7 @@ all: $(EXEC)
 $(EXEC): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-%.o: ../%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) -o $@ -c $< $(CXXFLAGS)
 
 clean:

@@ -1,8 +1,5 @@
 #include "Partie.hpp"
 
-using namespace irr;
-using namespace std;
-
 int main()
 {
 

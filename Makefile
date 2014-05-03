@@ -1,4 +1,4 @@
-CC=g++
+CXX=g++
 CXXFLAGS= -std=c++11 -Wall -ggdb
 LDFLAGS= -lGL -lIrrlicht
 
@@ -12,15 +12,15 @@ EXEC=Jeu
 all: $(EXEC) 
 
 $(EXEC): $(OBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CC) -o $@ -c $< $(CXXFLAGS)
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 clean:
-	rm -f $(OBJ)
+	@rm -f $(OBJ)
 
 mrproper:clean
-	rm -f $(EXEC)
+	@rm -f $(EXEC)
 
-
+.PHONY: clean mrproper

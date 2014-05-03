@@ -5,12 +5,15 @@ using namespace std;
 Plateau::Plateau(int taille)
 {
 	m_taille = taille;
-	m_grille.resize(taille); 
+	m_grille.resize(taille);
 
 	for(int i = 0; i < taille; ++i)
 		m_grille[i].resize(taille);
 
 	initialiser();
+
+	m_nbCombos = 0;
+	m_tirsRestants = 10;
 }
 
 Plateau::~Plateau()
@@ -66,7 +69,10 @@ void Plateau::afficher()
 void Plateau::augmenterNiveauCase(int x, int y)
 {
 	if(m_grille[x][y] >= 3)
+	{
+		++m_nbCombos;
 		exploserCase(x, y);
+	}
 
 	else
 		++m_grille[x][y];
@@ -78,7 +84,7 @@ void Plateau::exploserCase(int x, int y)
 
 	int i(0);
 
-	//Vers le haut 
+	//Vers le haut
 	i = y-1;
 	while(i >= 0)
 	{

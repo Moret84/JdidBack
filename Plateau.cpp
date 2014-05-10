@@ -69,10 +69,7 @@ void Plateau::afficher()
 void Plateau::augmenterNiveauCase(int x, int y)
 {
 	if(m_grille[x][y] >= 3)
-	{
-		++m_nbCombos;
 		exploserCase(x, y);
-	}
 
 	else
 		++m_grille[x][y];
@@ -80,6 +77,7 @@ void Plateau::augmenterNiveauCase(int x, int y)
 
 void Plateau::exploserCase(int x, int y)
 {
+	++m_nbCombos;
 	m_grille[x][y] = 0;
 
 	int i(0);
@@ -135,7 +133,6 @@ void Plateau::exploserCase(int x, int y)
 		
 		++i;
 	}
-
 }
 
 bool Plateau::resolu() const

@@ -1,4 +1,5 @@
 #include "Rendu.hpp"
+#include <unistd.h>
 
 using namespace irr;
 using namespace core;
@@ -22,7 +23,7 @@ Rendu::Rendu(Plateau* plateauRendu)
 	m_sceneManager->setAmbientLight(SColorf(1.0,1.0,1.0,0.0));
 
 	//Caméra fixe
-	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 3, 4.3f), vector3df(1.6f, 0, 2.2f));
+	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 4, 4.5f), vector3df(1.6f, 1, 1.0f));
 	
 	//Debug FPS
 	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
@@ -41,7 +42,7 @@ Rendu::Rendu(Plateau* plateauRendu)
 
 	//Monde à prendre en compte pour les collisions
 	m_metaSelector = m_sceneManager->createMetaTriangleSelector();
-	
+
 	m_casePlateau.resize(m_plateauRendu->getTaille());
 	m_sphere.resize(m_plateauRendu->getTaille());
 
@@ -51,21 +52,27 @@ Rendu::Rendu(Plateau* plateauRendu)
 		m_sphere[i].resize(m_plateauRendu->getTaille());
 	}	
 
-	dessinerPlateau();
-
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
-		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
-			dessinerSphere(i, j);
-
-	ISceneNode* test = m_sceneManager->addAnimatedMeshSceneNode(m_wumpa, 0, -1, vector3df(6, 0.5, -1.5), vector3df(-5, -45, 18), vector3df(2.0/3));
-	ISceneNodeAnimator* animator = m_sceneManager->createRotationAnimator(vector3df(0, 1, 0));
-	//test->addAnimator(animator);
-	animator->drop();
-	test->setMaterialFlag(EMF_LIGHTING, false);
+	m_sceneManager->addSkyDomeSceneNode(m_driver->getTexture("nsanitybeach.jpg"), 16, 8, 1, 10000000);
 	m_font = m_device->getGUIEnvironment()->getFont("superwumpa.xml");
-	m_tirsRestants = m_device->getGUIEnvironment()->addStaticText(stringw(m_plateauRendu->getTirsRestants()).c_str(), rect<s32>(100, 0, 200, 50));
+	m_tirsRestants = m_device->getGUIEnvironment()->addStaticText(stringw(m_plateauRendu->getTirsRestants()).c_str(), rect<s32>(5, 10, 105, 60));
 	m_tirsRestants->setOverrideFont(m_font);
 	m_tirsRestants->setOverrideColor(SColor(255, 234, 102, 0));
+
+	dessinerPlateau();
+
+	/*for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+			dessinerSphere(i, j);*/
+	chargerSpheres();
+}
+
+bool Rendu::resolu() const
+{
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+			if(m_sphere[i][j])
+				return false;
+	return true;
 }
 
 void Rendu::dessinerPlateau()
@@ -73,9 +80,9 @@ void Rendu::dessinerPlateau()
 	f32 x, y, z;
 	x = y = z = 0.0f;
 
-	for(int i = 0; i < m_plateauRendu->getTaille(); ++i, x = 0.0f, z += 1.1f)
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i, x = 0.0f, z += 1.0f)
 	{
-		for(int j = m_plateauRendu->getTaille() - 1; j >= 0; --j, x+= 1.1f)
+		for(int j = m_plateauRendu->getTaille() - 1; j >= 0; --j, x+= 1.0f)
 		{
 			m_casePlateau[i][j] = m_sceneManager->addCubeSceneNode(
 					1.0f, 											//Taille du cube
@@ -130,7 +137,8 @@ void Rendu::dessinerSphere(int x, int y)
 		m_metaSelector->addTriangleSelector(m_sphere[x][y]->getTriangleSelector());
 
 		vector3df positionDepart = m_sphere[x][y]->getPosition();
-		vector3df positionArrivee = vector3df(positionDepart.X , positionDepart.Y + 0.07, positionDepart.Z - 0.05);
+		//vector3df positionArrivee = vector3df(positionDepart.X , positionDepart.Y + 0.07, positionDepart.Z - 0.05);
+		vector3df positionArrivee = vector3df(positionDepart.X , positionDepart.Y + 0.15, positionDepart.Z);
 
 		ISceneNodeAnimator* animator = m_sceneManager->createFlyStraightAnimator(
 				positionDepart,
@@ -142,7 +150,7 @@ void Rendu::dessinerSphere(int x, int y)
 		m_sphere[x][y]->addAnimator(animator);
 		animator->drop();
 
-		animator = m_sceneManager->createRotationAnimator(vector3df(0, 1, 0));
+		animator = m_sceneManager->createRotationAnimator(vector3df(0, 3, 0));
 
 		m_sphere[x][y]->addAnimator(animator);
 		animator->drop();
@@ -150,6 +158,68 @@ void Rendu::dessinerSphere(int x, int y)
 
 	else
 		m_sphere[x][y] = nullptr;
+}
+
+void Rendu::clear()
+{
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+		{
+			m_sceneManager->addToDeletionQueue(m_sphere[i][j]);
+		}
+	}
+}
+
+void Rendu::chargerSpheres()
+{
+	vector3df positionDepart, positionArrivee;
+	ISceneNodeAnimator *animatorChute, *animatorRebond;
+
+	for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for( int j = 0; j < m_plateauRendu->getTaille(); ++j)
+		{
+			dessinerSphere(i, j);
+
+			if(m_sphere[i][j])
+			{
+				positionDepart = m_casePlateau[i][j]->getPosition();
+				positionDepart.Y += 10.0;
+				positionArrivee = m_casePlateau[i][j]->getPosition();
+				positionArrivee.Y += 0.11;
+				animatorChute = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, false, false);
+				animatorChute->drop();
+
+				positionDepart = positionArrivee;
+				positionArrivee.Y += (2 - 0.11);
+				animatorRebond = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, true, false);
+				animatorRebond->drop();
+
+				//m_sphere[i][j]->addAnimator(animatorChute);
+				//animatorChute->drop();
+				//m_sphere[i][j]->addAnimator(animatorRebond);
+				//animatorRebond->drop();
+			}
+		}
+	}
+
+	/*for(int i = 0; i < m_plateauRendu->getTaille(); ++i)
+	{
+		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
+		{
+			if(m_sphere[i][j])
+			{
+				positionDepart = m_casePlateau[i][j]->getPosition();
+				positionDepart.Y += 0.11;
+				positionArrivee = positionDepart;
+				positionArrivee.Y += (1.0 - 0.11);
+				animator = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee,1000, false, true);
+				m_sphere[i][j]->addAnimator(animator);
+				animator->drop();
+			}
+		}
+	}*/
 }
 
 Rendu::~Rendu()
@@ -176,6 +246,22 @@ void Rendu::afficher()
 		for(int j = 0; j < m_plateauRendu->getTaille(); ++j)
 			cout<<"("<<m_casePlateau[i][j]->getPosition().X<<", "<<m_casePlateau[i][j]->getPosition().Z<<") ";
 		cout<<endl;
+	}
+}
+
+void Rendu::attendreAnimations()
+{
+	std::list<ISceneNodeAnimator*>::iterator it = m_fileAnimation.begin();
+
+	while(it != m_fileAnimation.end())
+	{
+		if((*it)->hasFinished())
+		{
+			cout<<"j'efface "<<(*it)<<endl;
+			m_fileAnimation.erase(it++);
+		}
+		else
+			++it;
 	}
 }
 
@@ -224,19 +310,27 @@ void Rendu::majSphere()
 		return;
 	
 	m_plateauRendu->diminuerTirsRestants();
+	m_plateauRendu->resetCombos();
+	m_tirsRestants->setText(stringw(m_plateauRendu->getTirsRestants()).c_str());
+
 	s32 i = m_clickedSphere->getID() / m_plateauRendu->getTaille();		
 	s32 j = m_clickedSphere->getID() % m_plateauRendu->getTaille();
 
 	augmenterNiveauSphere(i, j);
 
-	if(m_plateauRendu->getNbCombos() >= 2)
-	{
-		m_plateauRendu->augmenterTirsRestants();
-		m_plateauRendu->resetCombos();
-	}
-
 	m_clickedSphere = nullptr;
 
+}
+
+void Rendu::majTirs()
+{
+	if(m_plateauRendu->getNbCombos() > 2)
+	{
+			m_plateauRendu->augmenterTirsRestants();
+			m_plateauRendu->resetCombos();
+	}
+
+	m_tirsRestants->setText(stringw(m_plateauRendu->getTirsRestants()).c_str());
 }
 
 void Rendu::augmenterNiveauSphere(int x, int y)
@@ -322,7 +416,9 @@ void Rendu::exploserSphere(int x, int y)
 	for(auto it = m_miniSphere.begin(); it != m_miniSphere.end(); ++it)
 	{
 		it->node->addAnimator(it->animatorVol);
-		it->animatorVol->drop();
+		m_fileAnimation.push_back(it->animatorVol);
+		cout<<"j'empile " <<it->animatorVol<<endl;
+		//it->animatorVol->drop();
 
 		if(it->animatorCollision)
 		{
@@ -333,6 +429,7 @@ void Rendu::exploserSphere(int x, int y)
 		if(it->animatorDelete)
 		{
 			it->node->addAnimator(it->animatorDelete);
+			//m_fileAnimation.push_back(it->animatorDelete);
 			it->animatorDelete->drop();
 		}
 	}

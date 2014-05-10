@@ -1,12 +1,13 @@
-CXX=g++
+XX=g++
 CXXFLAGS= -std=c++11 -Wall -ggdb
 LDFLAGS= -lGL -lIrrlicht
 
 SRCDIR=.
+INCDIR=.
 OBJDIR=obj
 
 SRC=$(wildcard $(SRCDIR)/*.cpp)
-OBJ=$(SRC:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+OBJ=$(SRC:%.cpp=$(OBJDIR)/%.o)
 EXEC=Jeu
 
 all: $(EXEC) 
@@ -14,7 +15,7 @@ all: $(EXEC)
 $(EXEC): $(OBJ)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp 
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 clean:
@@ -23,4 +24,6 @@ clean:
 mrproper:clean
 	@rm -f $(EXEC)
 
-.PHONY: clean mrproper
+rebuild:mrproper all
+
+.PHONY: clean mrproper rebuild

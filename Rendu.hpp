@@ -5,6 +5,8 @@
 #include "Plateau.hpp"
 #include <string>
 #include <array>
+#include <list>
+#include <deque>
 
 enum typeNoeud :irr::s32
 {
@@ -50,7 +52,8 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
-		std::array <MiniSphere, 4> m_miniSphere;
+		std::list<irr::scene::ISceneNodeAnimator*> m_fileAnimation;
+		std::array <MiniSphere, 4> m_miniSphere;								
 		irr::scene::IMetaTriangleSelector* m_metaSelector;						//Sélecteur de sphère pour collision
 
 	public:
@@ -62,16 +65,24 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		irr::video::IVideoDriver* getDriver() const { return m_driver; }
 		irr::scene::ISceneManager* getSceneManager() const { return m_sceneManager; }
 		irr::gui::IGUIFont* getGUIFont() const { return m_font; }
+		irr::gui::IGUIStaticText* getTirsRestants() const { return m_tirsRestants; };
+
 
 		void dessinerPlateau();
 		void dessinerSphere(int, int);
+		void chargerSpheres();
+		void clear();
 
 		void afficher();
+		bool resolu() const;
 		
 		virtual bool OnEvent(const irr::SEvent &event);
 		virtual bool onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator);
 
+		std::list<irr::scene::ISceneNodeAnimator*> getFileAnimation() { return m_fileAnimation; }
+		void attendreAnimations();
 		void majSphere();
+		void majTirs();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
 

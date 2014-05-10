@@ -12,6 +12,7 @@ class Plateau
 		int m_taille;
 		int m_nbCombos;
 		int m_tirsRestants;
+		int m_niveau;
 		std::vector<std::vector<int>> m_grille;
 		
 	public:
@@ -26,12 +27,14 @@ class Plateau
 
 		void augmenterTirsRestants() { ++m_tirsRestants; }
 		void diminuerTirsRestants() { --m_tirsRestants; }
+		void niveauSuivant() { ++m_niveau; }
 		void resetCombos() { m_nbCombos = 0; }
 
 		int getTaille() const { return m_taille; }
 		int getNiveauCase(int x, int y) const { return m_grille[x][y]; }
 		int getNbCombos() const { return m_nbCombos; }
 		int getTirsRestants() const { return m_tirsRestants; }
+		int getNiveauPlateau() const { return m_niveau; }
 };
 
 #endif

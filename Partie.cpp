@@ -17,9 +17,18 @@ void Partie::jouer()
 	while (m_rendu.getDevice()->run())
 	{
 		m_rendu.getDriver()->beginScene(true,true, blanc);
+		m_rendu.attendreAnimations();
+		if(m_rendu.resolu() && m_rendu.getFileAnimation().empty())
+		{
+			m_plateau.initialiser();
+			m_rendu.chargerSpheres();
+		}
+
 		m_rendu.majSphere();
 //		cout<<R.getDriver()->getFPS()<<endl;
 		m_rendu.getSceneManager()->drawAll();
+		m_rendu.getDevice()->getGUIEnvironment()->drawAll();
+		m_rendu.majTirs();
 		m_rendu.getDevice()->getGUIEnvironment()->drawAll();
 		m_rendu.getDriver()->endScene();
 	}

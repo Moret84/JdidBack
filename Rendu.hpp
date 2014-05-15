@@ -2,7 +2,7 @@
 #define RENDU_HPP
 
 #include <irrlicht/irrlicht.h>
-#include "Plateau.hpp"
+#include "Partie.hpp"
 #include <string>
 #include <array>
 #include <list>
@@ -12,14 +12,6 @@ enum typeNoeud :irr::s32
 {
 	CASE,
 	SPHERE
-};
-
-enum directionSphere :irr::s32
-{
-	NORD = 0,
-	SUD,
-	EST,
-	OUEST
 };
 
 struct MiniSphere
@@ -41,7 +33,7 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		irr::gui::IGUIFont* m_font;
 		irr::gui::IGUIStaticText* m_tirsRestants;
 
-		Plateau* m_plateauRendu; 												//Pointeur vers le plateau de jeu représenté
+		Partie m_partie; 														//Pointeur vers le plateau de jeu représenté
 
 		irr::scene::IAnimatedMesh* m_wumpa;										//Mesh de la sphère
 		irr::scene::ISceneNode* m_pereCases;									//Hiérarchise le graphe de scène
@@ -52,13 +44,13 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
-		std::list<irr::scene::ISceneNodeAnimator*> m_fileAnimation;
+		std::list<MiniSphere> m_fileAnimation;
 		std::array <MiniSphere, 4> m_miniSphere;								
 		irr::scene::IMetaTriangleSelector* m_metaSelector;						//Sélecteur de sphère pour collision
 
 	public:
 
-		Rendu(Plateau* plateauRendu);
+		Rendu();
 		~Rendu();
 
 		irr::IrrlichtDevice* getDevice() const { return m_device; }
@@ -72,6 +64,7 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		void dessinerSphere(int, int);
 		void chargerSpheres();
 		void clear();
+		void testAnimator();
 
 		void afficher();
 		bool resolu() const;
@@ -79,12 +72,12 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		virtual bool OnEvent(const irr::SEvent &event);
 		virtual bool onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator);
 
-		std::list<irr::scene::ISceneNodeAnimator*> getFileAnimation() { return m_fileAnimation; }
 		void attendreAnimations();
 		void majSphere();
-		void majTirs();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);
+		void lancer();
+		void rendre();
 
 		irr::core::vector3df calculDestinationMiniSphere(int, int, directionSphere);
 };

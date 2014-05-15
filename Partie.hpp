@@ -1,23 +1,48 @@
 #ifndef PARTIE_HPP
 #define PARTIE_HPP
 
-#include <irrlicht/irrlicht.h>
-#include "Rendu.hpp"
+#include <iostream>
+#include <random>
+#include <vector>
+
+enum directionSphere : int 
+{
+	NORD = 0,
+	SUD,
+	EST,
+	OUEST
+};
 
 class Partie
 {
-	private : 
+	private:
+
+		int m_taille;
+		int m_nbCombos;
+		int m_tirsRestants;
+		int m_niveau;
+		std::vector<std::vector<int>> m_grille;
 		
-		Plateau	m_plateau;
-		Rendu m_rendu;
-	
+		void exploserCase(int , int);
+
 	public:
 
-		Partie(int taillePlateau = 4);
+		Partie(int taille = 4);
+		~Partie();
+		void initialiser();
+		void choixCase(int, int);
+		void afficher() const;
 		void jouer();
-		void sauver();
-		void charger();
+		void majCombos();
+		void levelUp();
+		bool resolu() const;
 
+		int getTaille() const { return m_taille; }
+		int getNiveauCase(int x, int y) const { return m_grille[x][y]; }
+		int getNbCombos() const { return m_nbCombos; }
+		int getTirsRestants() const { return m_tirsRestants; }
+		int getNiveauPartie() const { return m_niveau; }
 };
 
 #endif
+

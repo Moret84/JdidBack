@@ -1,10 +1,9 @@
-#include "Partie.hpp"
+#include "Rendu.hpp"
 
 int main()
 {
-
-	Partie P;
-	P.jouer();
+	Rendu R;
+	R.lancer();
 
 	return 0;
 }

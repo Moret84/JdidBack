@@ -21,13 +21,13 @@ Rendu::Rendu() : m_partie()
 
 	//Caméra fixe
 	m_sceneManager->addCameraSceneNode(0, vector3df(1.6f, 4, 4.5f), vector3df(1.6f, 1, 1.0f));
-	
+
 	//Debug FPS
 	//m_sceneManager->addCameraSceneNodeFPS(0,100.0f,0.005f,-1);
 
 	//Chargement du mesh
 	m_wumpa = m_sceneManager->getMesh("appletest.obj");
-	
+
 	//Noeud père des cases du plateau
 	m_pereCases = m_sceneManager->addEmptySceneNode(0, CASE);
 
@@ -50,8 +50,8 @@ Rendu::Rendu() : m_partie()
 	}	
 
 	m_sceneManager->addSkyDomeSceneNode(m_driver->getTexture("nsanitybeach.jpg"), 16, 8, 1, 10000000);
-	m_font = m_device->getGUIEnvironment()->getFont("superwumpa.xml");
-	m_tirsRestants = m_device->getGUIEnvironment()->addStaticText(stringw(m_partie.getTirsRestants()).c_str(), rect<s32>(5, 10, 105, 60));
+	m_font = m_device->getGUIEnvironment()->getFont("../superwumpa/superwumpa.xml");
+	m_tirsRestants = m_device->getGUIEnvironment()->addStaticText(stringw(m_partie.getTirsRestants()).c_str(), rect<s32>(5, 10, 105, 80));
 	m_tirsRestants->setOverrideFont(m_font);
 	m_tirsRestants->setOverrideColor(SColor(255, 234, 102, 0));
 
@@ -112,7 +112,7 @@ void Rendu::dessinerSphere(int x, int y)
 				break;
 			case 3:
 				echelle = vector3df(1);
-			break;
+				break;
 		}
 
 		vector3df positionCase(m_casePlateau[x][y]->getPosition());
@@ -170,17 +170,17 @@ void Rendu::chargerSpheres()
 
 			if(m_sphere[i][j])
 			{
+				//Chute
 				positionDepart = m_casePlateau[i][j]->getPosition();
 				positionDepart.Y += 10.0;
 				positionArrivee = m_casePlateau[i][j]->getPosition();
 				positionArrivee.Y += 0.11;
-				animatorChute = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, false, false);
-				animatorChute->drop();
+				m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, false, false);
 
+				//Rebond
 				positionDepart = positionArrivee;
 				positionArrivee.Y += (2 - 0.11);
-				animatorRebond = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, true, false);
-				animatorRebond->drop();
+				m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee, 500, true, false);
 
 				//m_sphere[i][j]->addAnimator(animatorChute);
 				//animatorChute->drop();
@@ -189,28 +189,27 @@ void Rendu::chargerSpheres()
 			}
 		}
 	}
-
-	/*for(int i = 0; i < m_partie.getTaille(); ++i)
-	{
-		for(int j = 0; j < m_partie.getTaille(); ++j)
-		{
-			if(m_sphere[i][j])
-			{
-				positionDepart = m_casePlateau[i][j]->getPosition();
-				positionDepart.Y += 0.11;
-				positionArrivee = positionDepart;
-				positionArrivee.Y += (1.0 - 0.11);
-				animator = m_sceneManager->createFlyStraightAnimator(positionDepart, positionArrivee,1000, false, true);
-				m_sphere[i][j]->addAnimator(animator);
-				animator->drop();
-			}
-		}
-	}*/
 }
 
 Rendu::~Rendu()
 {
 
+}
+
+void Rendu::clear()
+{
+	m_metaSelector->removeAllTriangleSelectors();
+	for(int i = 0; i < m_partie.getTaille(); ++i)
+	{
+		for(int j = 0; j < m_partie.getTaille(); ++j)
+		{
+			if(m_sphere[i][j])
+			{
+				m_sceneManager->addToDeletionQueue(m_sphere[i][j]);
+				m_sphere[i][j] = nullptr;
+			}
+		}
+	}
 }
 
 void Rendu::afficher()
@@ -241,18 +240,19 @@ bool Rendu::onCollision(const ISceneNodeAnimatorCollisionResponse &animator)
 	int x = index / m_partie.getTaille();
 	int y = index % m_partie.getTaille();
 	m_sceneManager->addToDeletionQueue(animator.getTargetNode());
-	
+
 	augmenterNiveauSphere(x, y);
-	
+
 	return true;
 }
+
 void Rendu::testAnimator()
 {
-	auto it = m_fileAnimation.begin();
-	while(it != m_fileAnimation.end())
+	auto it = m_spheresEnVol.begin();
+	while(it != m_spheresEnVol.end())
 	{
 		if(it->animatorCollision->collisionOccurred() || it->animatorDelete->hasFinished())
-			m_fileAnimation.erase(it++);
+			m_spheresEnVol.erase(it++);
 
 		else
 			++it;
@@ -281,21 +281,26 @@ bool Rendu::OnEvent(const SEvent &event)
 					->getSceneNodeFromScreenCoordinatesBB(curseur, 0, false, m_pereCases);	//Case en collision avec le clic
 			}
 
+
 		}	
-			return true;
+		return true;
 	}
-			
-		return false;
+
+	return false;
 }
 
 void Rendu::majSphere()
 {
-	if(!m_fileAnimation.empty())
+	if(!m_spheresEnVol.empty())
+	{
 		m_clickedSphere = nullptr;
+		return;
+	}
 
 	if(!m_clickedSphere)
 		return;
-	
+
+	m_partie.diminuerTirsRestants();
 	m_tirsRestants->setText(stringw(m_partie.getTirsRestants()).c_str());
 
 	s32 i = m_clickedSphere->getID() / m_partie.getTaille();		
@@ -304,12 +309,10 @@ void Rendu::majSphere()
 	augmenterNiveauSphere(i, j);
 
 	m_clickedSphere = nullptr;
-
 }
 
 void Rendu::augmenterNiveauSphere(int x, int y)
 {
-
 	if(!m_sphere[x][y])
 	{
 		m_partie.choixCase(x, y);
@@ -357,7 +360,7 @@ void Rendu::exploserSphere(int x, int y)
 				positionMiniSphere,
 				vector3df(0),
 				vector3df(1.0/3));
-		
+
 		m_miniSphere[k].node->setMaterialFlag(EMF_LIGHTING, false);
 
 		m_miniSphere[k].animatorVol = m_sceneManager->createFlyStraightAnimator(positionMiniSphere, destinationMiniSphere, tempsAnimation);
@@ -376,7 +379,7 @@ void Rendu::exploserSphere(int x, int y)
 
 		m_miniSphere[k].animatorDelete = m_sceneManager->createDeleteAnimator(tempsAnimation);
 
-		m_fileAnimation.push_back(m_miniSphere[k]);
+		m_spheresEnVol.push_back(m_miniSphere[k]);
 	}
 
 	if(m_sphere[x][y])
@@ -387,11 +390,11 @@ void Rendu::exploserSphere(int x, int y)
 
 	m_partie.choixCase(x, y);
 
-	for(auto it = m_miniSphere.begin(); it != m_miniSphere.end(); ++c,++it)
+	for(auto it = m_miniSphere.begin(); it != m_miniSphere.end(); ++it)
 	{
 		it->node->addAnimator(it->animatorVol);
 		it->animatorVol->drop();
-		
+
 		if(it->animatorCollision)
 			it->node->addAnimator(it->animatorCollision);
 
@@ -431,7 +434,7 @@ void Rendu::rendre()
 	m_driver->beginScene(true, true, SColor(255, 255, 255, 255));
 	m_sceneManager->drawAll();
 	//cout<<R.getDriver()->getFPS()<<endl;
-	//m_rendu.getDevice()->getGUIEnvironment()->drawAll();
+	m_device->getGUIEnvironment()->drawAll();
 	testAnimator();
 	m_driver->endScene();
 }
@@ -442,6 +445,29 @@ void Rendu::lancer()
 	{
 		majSphere();
 		rendre();
+		rafraichir();
 	}
 	m_device->drop();
+}
+
+void Rendu::rafraichir()
+{
+	if(m_spheresEnVol.empty())
+	{
+		m_partie.majCombos();
+		m_tirsRestants->setText(stringw(m_partie.getTirsRestants()).c_str());
+
+		if(m_partie.resolu())
+		{
+			clear();
+			m_partie.levelUp();
+			chargerSpheres();
+		}
+
+		if(m_partie.getTirsRestants() <= 0)
+		{
+			clear();
+			m_device->setEventReceiver(nullptr);
+		}
+	}
 }

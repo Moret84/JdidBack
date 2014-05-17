@@ -69,13 +69,25 @@ void Partie::afficher() const
 	cout<<"Niveau : "<<m_niveau<<endl;
 }
 
-void Partie::choixCase(int x, int y)
+void Partie::choixCaseConsole(int x, int y)
 {
 	--m_tirsRestants;
 
 	if(m_grille[x][y] == 3)
 		exploserCase(x, y);
 
+	else
+		++m_grille[x][y];
+}
+
+void Partie::choixCase(int x, int y)
+{
+	if(m_grille[x][y] == 3)
+	{
+		++m_nbCombos;
+		m_grille[x][y] = 0;
+	}
+	
 	else
 		++m_grille[x][y];
 }
@@ -182,7 +194,7 @@ void Partie::jouer()
 			cin>>l;
 			cout<<"colonne ?"<<endl;
 			cin>>c;
-			choixCase(l, c);
+			choixCaseConsole(l, c);
 			majCombos();
 		}
 

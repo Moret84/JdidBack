@@ -30,6 +30,7 @@ class Partie
 		Partie(int taille = 4);
 		~Partie();
 		void initialiser();
+		void choixCaseConsole(int, int);
 		void choixCase(int, int);
 		void afficher() const;
 		void jouer();
@@ -37,6 +38,7 @@ class Partie
 		void levelUp();
 		bool resolu() const;
 
+		void diminuerTirsRestants() { --m_tirsRestants; }
 		int getTaille() const { return m_taille; }
 		int getNiveauCase(int x, int y) const { return m_grille[x][y]; }
 		int getNbCombos() const { return m_nbCombos; }

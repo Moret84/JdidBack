@@ -44,8 +44,8 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 
 		irr::scene::ISceneNode* m_clickedSphere;								//Sphère cliquée
 
-		std::list<MiniSphere> m_fileAnimation;
-		std::array <MiniSphere, 4> m_miniSphere;								
+		std::list<MiniSphere> m_spheresEnVol;									//Sphères en cours de vol
+		std::array <MiniSphere, 4> m_miniSphere;								//Stockage temporaire des mini sphères pour explosion.
 		irr::scene::IMetaTriangleSelector* m_metaSelector;						//Sélecteur de sphère pour collision
 
 	public:
@@ -72,7 +72,7 @@ class Rendu : public irr::IEventReceiver, public irr::scene::ICollisionCallback 
 		virtual bool OnEvent(const irr::SEvent &event);
 		virtual bool onCollision(const irr::scene::ISceneNodeAnimatorCollisionResponse &animator);
 
-		void attendreAnimations();
+		void rafraichir();
 		void majSphere();
 		void augmenterNiveauSphere(int, int);
 		void exploserSphere(int, int);

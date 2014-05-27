@@ -46,6 +46,8 @@ class Partie
 		int getNbCombos() const { return m_nbCombos; }
 		int getTirsRestants() const { return m_tirsRestants; }
 		int getNiveauPartie() const { return m_niveau; }
+
+		void recommencer();
 };
 
 #endif

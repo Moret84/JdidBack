@@ -50,15 +50,32 @@ Rendu::Rendu() : m_partie()
 	}	
 
 	m_sceneManager->addSkyDomeSceneNode(m_driver->getTexture("media/textures/nsanitybeach.jpg"), 16, 8, 1.0, 2.0, 1000.0, 0, -1);
-	m_font = m_device->getGUIEnvironment()->getFont("media/fonts/superwumpa.xml");
+
+	IGUIFont* policeTirsRestants = m_device->getGUIEnvironment()->getFont("media/fonts/superwumpa.xml");
+	IGUIFont* policeNiveau = m_device->getGUIEnvironment()->getFont("media/fonts/superWumpaNiveau.xml");
+	IGUIFont* fontMini = m_device->getGUIEnvironment()->getFont("media/fonts/superWumpaToutpetit.xml");
+
+	SColor orangeBandicoot = SColor(255, 234, 102, 0);
+
+	m_device->getGUIEnvironment()->getSkin()->setFont(fontMini);
+	m_device->getGUIEnvironment()->getSkin()->setColor(EGDC_BUTTON_TEXT, orangeBandicoot);
+	m_device->getGUIEnvironment()->getSkin()->setColor(EGDC_ACTIVE_CAPTION, orangeBandicoot);
+	m_device->getGUIEnvironment()->getSkin()->setColor(EGDC_INACTIVE_CAPTION, orangeBandicoot);
+
 	m_tirsRestants = m_device->getGUIEnvironment()->addStaticText(stringw(m_partie.getTirsRestants()).c_str(), rect<s32>(5, 10, 105, 80));
-	m_tirsRestants->setOverrideFont(m_font);
-	m_tirsRestants->setOverrideColor(SColor(255, 234, 102, 0));
+	m_tirsRestants->setOverrideFont(policeTirsRestants);
+
+	IGUIStaticText*	labelNiveau = m_device->getGUIEnvironment()->addStaticText(stringw(L"Niveau").c_str(), rect<s32>(650, 30, 750, 80));
+	labelNiveau->setOverrideFont(policeNiveau);
+	m_niveau = m_device->getGUIEnvironment()->addStaticText(stringw(m_partie.getNiveauPartie()).c_str(), rect <s32>(760, 30, 800, 80));
+	m_niveau->setOverrideFont(policeNiveau);
 
 	dessinerPlateau();
 
 	m_etapeChargement = 0;
 	chargerSpheres();
+
+	m_etatJeu = EN_JEU;
 }
 
 void Rendu::dessinerPlateau()
@@ -135,7 +152,7 @@ void Rendu::dessinerSphere(int x, int y)
 
 void Rendu::chargerSpheres()
 {
-	if(m_etapeChargement > 9)
+	if(m_etapeChargement > 1)
 		m_etapeChargement = -1;
 
 	if(m_etapeChargement == -1)
@@ -165,51 +182,19 @@ void Rendu::chargerSpheres()
 					m_sphere[i][j].node->addAnimator(m_sphere[i][j].animator);
 				}
 
-				else
+				//Lévitation
+				else if(m_etapeChargement == 1)
 				{
 					positionDepart = m_sphere[i][j].node->getPosition();
+					positionArrivee = positionDepart;
+					positionArrivee.Y += 0.15f;
 
-					//Rebond
-					if(m_etapeChargement < 9 && m_etapeChargement %2 != 0)
-					{
-						double hauteur = 4;
-						for(int i = m_etapeChargement; i >= 1; i-=2)
-							hauteur /= 2.0;
-
-						positionArrivee = positionDepart;
-						positionArrivee.Y += (hauteur - 0.11);
-
-						m_sphere[i][j].node->removeAnimator(m_sphere[i][j].animator);
-						m_sphere[i][j].animator= m_sceneManager
-							->createFlyStraightAnimator(positionDepart, positionArrivee, 500, false, false);
-						m_spheresEnChargement.push_back(m_sphere[i][j].animator);
-					}
-
-					//Rechute
-					else if(m_etapeChargement < 9 && m_etapeChargement%2 == 0)
-					{
-						positionArrivee = m_casePlateau[i][j]->getPosition();
-						positionArrivee.Y += 0.11;
-
-						m_sphere[i][j].node->removeAnimator(m_sphere[i][j].animator);
-						m_sphere[i][j].animator= m_sceneManager
-							->createFlyStraightAnimator(positionDepart, positionArrivee, 500, false, false);
-						m_spheresEnChargement.push_back(m_sphere[i][j].animator);
-					}
-
-					//Lévitation
-					else if(m_etapeChargement == 9)
-					{
-						positionArrivee = positionDepart;
-						positionArrivee.Y += 0.15f;
-
-						m_sphere[i][j].node->removeAnimator(m_sphere[i][j].animator);
-						m_sphere[i][j].animator = m_sceneManager
-							->createFlyStraightAnimator(positionDepart, positionArrivee, 500, true, true);
-					}
-
-					m_sphere[i][j].node->addAnimator(m_sphere[i][j].animator);
+					m_sphere[i][j].node->removeAnimator(m_sphere[i][j].animator);
+					m_sphere[i][j].animator = m_sceneManager
+						->createFlyStraightAnimator(positionDepart, positionArrivee, 500, true, true);
 				}
+
+				m_sphere[i][j].node->addAnimator(m_sphere[i][j].animator);
 			}
 		}
 	}
@@ -307,7 +292,7 @@ bool Rendu::OnEvent(const SEvent &event)
 {
 	if(event.EventType == EET_MOUSE_INPUT_EVENT)
 	{
-		if(event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+		if(event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN && m_etatJeu != PERDU)
 		{
 			position2d <s32> curseur = m_device
 				->getCursorControl()
@@ -324,9 +309,24 @@ bool Rendu::OnEvent(const SEvent &event)
 					->getSceneNodeFromScreenCoordinatesBB(curseur, 0, false, m_pereCases);	//Case en collision avec le clic
 			}
 
-
+			return true;
 		}	
-		return true;
+	}
+
+	else if(event.EventType == EET_GUI_EVENT)
+	{
+		if(event.GUIEvent.EventType == EGET_MESSAGEBOX_YES)
+		{
+			recommencer();
+			return true;
+		}
+
+		else if(event.GUIEvent.EventType == EGET_MESSAGEBOX_NO)
+		{
+			m_device->closeDevice();
+			return true;
+		}
+
 	}
 
 	return false;
@@ -334,13 +334,13 @@ bool Rendu::OnEvent(const SEvent &event)
 
 void Rendu::majSphere()
 {
-	if(!m_spheresEnVol.empty() || !m_spheresEnChargement.empty())
+	if(!m_spheresEnVol.empty()) 
 	{
 		m_clickedSphere = nullptr;
 		return;
 	}
 
-	if(!m_clickedSphere)
+	if(!m_clickedSphere || m_partie.getTirsRestants() <= 0)
 		return;
 
 	m_partie.diminuerTirsRestants();
@@ -478,9 +478,8 @@ void Rendu::rendre()
 	m_sceneManager->drawAll();
 	//cout<<R.getDriver()->getFPS()<<endl;
 	m_device->getGUIEnvironment()->drawAll();
-	majCombos();
 	testAnimator();
-	if(m_spheresEnChargement.empty() && m_etapeChargement != 0)
+	if(m_spheresEnChargement.empty() && m_etapeChargement > 0)
 		chargerSpheres();
 	m_driver->endScene();
 }
@@ -489,7 +488,8 @@ void Rendu::lancer()
 {
 	while(m_device->run())
 	{
-		majSphere();
+		if(m_etatJeu != PERDU)
+			majSphere();
 		rendre();
 		rafraichir();
 	}
@@ -498,12 +498,13 @@ void Rendu::lancer()
 
 void Rendu::rafraichir()
 {
-	if(m_spheresEnVol.empty())
+	if(m_spheresEnVol.empty() && m_etatJeu != PERDU)
 	{
 		if(m_partie.resolu())
 		{
 			clear();
 			m_partie.levelUp();
+			m_niveau->setText(stringw(m_partie.getNiveauPartie()).c_str());
 			m_etapeChargement = 0;
 			chargerSpheres();
 		}
@@ -511,16 +512,18 @@ void Rendu::rafraichir()
 		if(m_partie.getTirsRestants() <= 0)
 		{
 			clear();
-			m_device->setEventReceiver(nullptr);
+			m_etatJeu = PERDU;
 			m_device->getGUIEnvironment()->addMessageBox(L"Game Over", L"Vous avez perdu. \nRecommencer ?", true, EMBF_YES|EMBF_NO);
 		}
+
+		majCombos();
 	}
 
 }
 
 void Rendu::majCombos()
 {
-	for(int i = m_partie.getNbCombos() - 1; i > 0; i/=2)
+	if(m_partie.getNbCombos() > 2)
 	{
 		m_partie.augmenterTirsRestants();
 		m_tirsRestants->setText(stringw(m_partie.getTirsRestants()).c_str());
@@ -529,3 +532,12 @@ void Rendu::majCombos()
 
 	m_partie.resetCombos();
 }
+
+void Rendu::recommencer()
+{
+	m_partie.recommencer();
+	m_etatJeu = EN_JEU;
+	m_etapeChargement = 0;
+	chargerSpheres();
+}
+

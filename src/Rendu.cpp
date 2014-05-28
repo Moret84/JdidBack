@@ -508,6 +508,7 @@ void Rendu::rafraichir()
 			m_etapeChargement = 0;
 			chargerSpheres();
 		}
+			majCombos();
 
 		if(m_partie.getTirsRestants() <= 0)
 		{
@@ -516,7 +517,6 @@ void Rendu::rafraichir()
 			m_device->getGUIEnvironment()->addMessageBox(L"Game Over", L"Vous avez perdu. \nRecommencer ?", true, EMBF_YES|EMBF_NO);
 		}
 
-		majCombos();
 	}
 
 }
